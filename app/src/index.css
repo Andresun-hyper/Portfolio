@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 2%;
+    --foreground: 28 50% 55%;
+    --card: 220 30% 8%;
+    --card-foreground: 28 50% 55%;
+    --popover: 220 30% 8%;
+    --popover-foreground: 28 50% 55%;
+    --primary: 187 100% 50%;
+    --primary-foreground: 0 0% 2%;
+    --secondary: 252 100% 68%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 220 20% 15%;
+    --muted-foreground: 28 30% 40%;
+    --accent: 43 97% 59%;
+    --accent-foreground: 0 0% 2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 187 100% 50%;
+    --radius: 0px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background: #020711;
+  }
+
+  body {
+    @apply bg-void text-amber font-body;
+    min-height: 100vh;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+
+  * {
+    @apply border-border;
+    cursor: none;
+    box-sizing: border-box;
+  }
+
+  ::selection {
+    background: rgba(0, 229, 255, 0.3);
+    color: #00E5FF;
+  }
+}
+
+@layer components {
+  .terminal-border {
+    position: relative;
+  }
+
+  .hologram-panel {
+    background: rgba(10, 15, 30, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .neon-text {
+    text-shadow: 
+      0 0 5px rgba(0, 229, 255, 0.5),
+      0 0 10px rgba(0, 229, 255, 0.3),
+      0 0 20px rgba(0, 229, 255, 0.2);
+  }
+
+  .neon-text-orange {
+    text-shadow: 
+      0 0 5px rgba(253, 185, 51, 0.5),
+      0 0 10px rgba(253, 185, 51, 0.3),
+      0 0 30px rgba(253, 185, 51, 0.2);
+  }
+
+  .grid-bg {
+    background-image: 
+      linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .scanline::after {
+    content: '';
+    @apply absolute inset-0 pointer-events-none z-50;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 229, 255, 0.018) 2px,
+      rgba(0, 229, 255, 0.018) 4px
+    );
+  }
+
+  .scanline::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(0, 229, 255, 0.04),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: scan-sweep 5s linear infinite;
+  }
+
+  .glitch-text {
+    position: relative;
+  }
+
+  .section-title::before {
+    content: '[ // ] ';
+    @apply text-teal font-mono text-sm;
+  }
+}
+
+@keyframes scan-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
