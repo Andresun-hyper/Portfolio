@@ -657,7 +657,7 @@ button {
 
 .deck-year {
   position: absolute;
-  left: 0;
+  right: 0; /* 移至右下角，彻底避开左侧方向筛选按钮的重叠 */
   bottom: 0;
   display: flex;
   align-items: baseline;
