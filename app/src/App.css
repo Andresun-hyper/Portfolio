@@ -1611,14 +1611,13 @@ button {
   position: fixed;
   inset: 0;
   z-index: 1100;
-  overflow-x: hidden;
-  overflow-y: auto !important;
+  overflow: hidden !important;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(242, 245, 244, 0.94)),
     #f4f6f5;
   color: var(--ag-ink);
   font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  touch-action: pan-y;
+  touch-action: none; /* 既然由 scroll 容器承载手势，外层不需要 touch-action pan-y */
   user-select: none;
 }
 
@@ -3263,8 +3262,7 @@ a:active {
 
 .antigravity-playground {
   display: block;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden !important;
   scroll-behavior: smooth;
   background:
     linear-gradient(90deg, rgba(16, 21, 24, 0.028) 1px, transparent 1px),
@@ -3274,7 +3272,11 @@ a:active {
 }
 
 .antigravity-playground.has-project-open {
-  overflow: hidden;
+  overflow: hidden !important;
+}
+
+.antigravity-playground.has-project-open .antigravity-scroll {
+  overflow-y: hidden !important; /* 确保详情或简历弹窗打开时底层scroll容器完美锁定不能滚动 */
 }
 
 .antigravity-playground .antigravity-grid {

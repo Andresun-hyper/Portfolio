@@ -493,6 +493,7 @@ function getProjectMedia(project: Project): GalleryItem[] {
 
 export default function AntigravityPlayground({ onClose }: { onClose: () => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const homeRef = useRef<HTMLElement>(null);
   const projectsRef = useRef<HTMLElement>(null);
@@ -519,6 +520,16 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     [activeProjectId],
   );
 
+  const activeSectionRef = useRef(activeSection);
+  const activeProjectIdRef = useRef(activeProjectId);
+  const resumeOpenRef = useRef(resumeOpen);
+
+  useEffect(() => {
+    activeSectionRef.current = activeSection;
+    activeProjectIdRef.current = activeProjectId;
+    resumeOpenRef.current = resumeOpen;
+  }, [activeSection, activeProjectId, resumeOpen]);
+
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -533,6 +544,72 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     }, 2400);
 
     return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return undefined;
+
+    let wheelAccumulator = 0;
+    let lastWheelSign = 0;
+    let isAnimating = false;
+
+    const onWheel = (event: WheelEvent) => {
+      // 详情弹窗或简历打开时允许原生的内部局部滚动，跳过翻页拦截
+      if (activeProjectIdRef.current || resumeOpenRef.current) {
+        return;
+      }
+
+      // 强力屏蔽浏览器默认的连续无规则滚动以保证幻灯片吸附手感
+      event.preventDefault();
+
+      if (isAnimating) return;
+
+      const axisDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      const sign = Math.sign(axisDelta);
+      if (sign === 0) return;
+
+      if (sign !== lastWheelSign) {
+        wheelAccumulator = 0;
+      }
+      lastWheelSign = sign;
+      wheelAccumulator += Math.abs(axisDelta);
+
+      // 与普通模式的88阈值完全对齐
+      if (wheelAccumulator > 88) {
+        wheelAccumulator = 0;
+
+        const sections: ('home' | 'projects' | 'contact')[] = ['home', 'projects', 'contact'];
+        const currentIndex = sections.indexOf(activeSectionRef.current);
+        let targetIndex = currentIndex;
+
+        if (sign > 0) {
+          if (currentIndex < sections.length - 1) {
+            targetIndex = currentIndex + 1;
+          }
+        } else if (sign < 0) {
+          if (currentIndex > 0) {
+            targetIndex = currentIndex - 1;
+          }
+        }
+
+        if (targetIndex !== currentIndex) {
+          const nextSection = sections[targetIndex];
+          isAnimating = true;
+          scrollTo(nextSection);
+          setActiveSection(nextSection);
+
+          window.setTimeout(() => {
+            isAnimating = false;
+          }, 800);
+        }
+      }
+    };
+
+    scrollContainer.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      scrollContainer.removeEventListener('wheel', onWheel);
+    };
   }, []);
 
   useEffect(() => {
@@ -735,14 +812,14 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
   }, [activeMedia, activeProjectId, gravityEnabled, resetKey]);
 
   const scrollTo = (section: 'home' | 'projects' | 'contact') => {
-    const root = rootRef.current;
+    const scrollContainer = scrollRef.current;
     const target = {
       home: homeRef.current,
       projects: projectsRef.current,
       contact: contactRef.current,
     }[section];
-    if (!root || !target) return;
-    root.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+    if (!scrollContainer || !target) return;
+    scrollContainer.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -915,7 +992,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
         <X size={18} />
       </button>
 
-      <main className="antigravity-scroll">
+      <main ref={scrollRef} className="antigravity-scroll">
         <section className="antigravity-section antigravity-home" id="gravity-home" ref={homeRef}>
           <div className="antigravity-section-inner antigravity-hero">
             <button className="antigravity-logo" type="button" data-antigravity-body data-open-target="contact">
@@ -939,6 +1016,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                 value={query}
                 onChange={event => setQuery(event.target.value)}
                 aria-label="Search portfolio"
+                autoComplete="off"
               />
               <MousePointer2 size={18} />
             </form>
