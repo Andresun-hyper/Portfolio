@@ -2509,6 +2509,18 @@ a:active {
     display: none !important; /* 中等屏幕下隐藏绝对定位装饰字，为核心方向筛选按钮腾出完美的安全视觉空间 */
   }
 
+  .antigravity-brand {
+    display: none !important; /* 提前在此尺寸隐藏左侧品牌标志，为左右彻底分流释放关键宽度 */
+  }
+
+  .antigravity-nav {
+    margin-right: auto !important; /* 最强力 Flex 靠左规则，将导航栏死死钉在顶部最左侧，杜绝与右侧 fixed 控件发生任何遮挡 */
+  }
+
+  .antigravity-nav button:nth-child(3) {
+    display: inline-flex !important; /* 强行显现 Contact，避免在窄屏下被隐去 */
+  }
+
   .cover-copy h1 {
     font-size: 4.7rem;
   }
