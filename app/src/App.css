@@ -2990,6 +2990,10 @@ a:active {
     display: none !important;
   }
 
+  .antigravity-nav {
+    margin-right: auto !important; /* 强力 Flex 靠左规则，彻底将导航栏与右侧 fixed 控件分流 */
+  }
+
   .antigravity-nav a,
   .antigravity-nav button,
   .antigravity-footer button {
