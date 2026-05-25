@@ -3860,22 +3860,21 @@ a:active {
   border: 1px solid rgba(16, 21, 24, 0.04);
 }
 
-.resume-mock-project {
-  margin-bottom: 0.65rem;
+.resume-mock-project-brief {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  margin-top: 0.35rem;
 }
 
-.resume-mock-project strong {
-  font-size: 0.88rem;
-  font-weight: 800;
-  color: var(--ag-ink, #101518);
-  display: block;
-}
-
-.resume-mock-project p {
-  margin: 0.18rem 0 0;
-  font-size: 0.76rem;
+.resume-mock-project-brief span {
+  font-size: 0.72rem;
+  font-weight: 700;
   color: #657074;
-  line-height: 1.45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
 }
 
 .resume-mock-footer {

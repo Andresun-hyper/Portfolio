@@ -1028,7 +1028,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                   <div className="resume-mock-top">
                     <div className="resume-mock-meta">
                       <h3>孙启圣 / Andre Sun</h3>
-                      <p className="resume-mock-tagline">产品设计硕士在读 · 寻求产品与体验设计相关机会</p>
+                      <p className="resume-mock-tagline">产品与体验设计师 · 硕士在读</p>
                     </div>
                     <span className="resume-mock-avatar-box">孙</span>
                   </div>
@@ -1041,35 +1041,34 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                           <strong>上海工程技术大学</strong>
                           <span>产品设计硕士 · 在读</span>
                         </div>
-                      </section>
-                      <section>
-                        <h4>专业技能 / Skills</h4>
-                        <div className="resume-skill-list">
-                          <span>Rhino</span>
-                          <span>KeyShot</span>
-                          <span>React Prototype</span>
-                          <span>AIGC Workflow</span>
-                          <span>CMF</span>
+                        <div className="resume-mock-item" style={{ marginTop: '0.4rem' }}>
+                          <strong>亳州学院</strong>
+                          <span>产品设计本科 · 毕业</span>
                         </div>
                       </section>
                     </div>
                     <div className="resume-mock-col right">
                       <section>
-                        <h4>核心项目 / Selected Projects</h4>
-                        <div className="resume-mock-project">
-                          <strong>1. 腕部康复评估交互系统 (UX)</strong>
-                          <p>居家安全校验、动作实时评分、训练结果可视化的交互体验闭环。</p>
+                        <h4>核心技能 / Skills</h4>
+                        <div className="resume-skill-list">
+                          <span>UI/UX</span>
+                          <span>AIGC</span>
+                          <span>3D 渲染</span>
+                          <span>交互原型</span>
                         </div>
-                        <div className="resume-mock-project">
-                          <strong>2. AQUARA 鱼缸清洁机器人 (ID)</strong>
-                          <p>自动爬壁、自清洁、充电回仓一体化设计。</p>
+                      </section>
+                      <section style={{ marginTop: '0.5rem' }}>
+                        <h4>代表作 / Selected</h4>
+                        <div className="resume-mock-project-brief">
+                          <span>1. 腕部康复交互系统</span>
+                          <span>2. clean 鱼缸机器人</span>
                         </div>
                       </section>
                     </div>
                   </div>
                   
                   <div className="resume-mock-footer">
-                    <span>点击一键查看高清 PDF 简历文档</span>
+                    <span>双击卡片 展开高保真网页简历</span>
                   </div>
                 </div>
                 <a className="resume-open-link" href={RESUME_FILE} target="_blank" rel="noreferrer">
