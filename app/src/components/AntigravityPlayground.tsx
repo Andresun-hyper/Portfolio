@@ -511,6 +511,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     droplet: 'overview',
   });
   const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
+  const [resumeOpen, setResumeOpen] = useState(false);
   const activeSuggestion = SEARCH_SUGGESTIONS[suggestionIndex];
   const activeProject = useMemo(
     () => projects.find(project => project.id === activeProjectId) ?? projects[0],
@@ -735,7 +736,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     }
 
     if (target === 'resume') {
-      window.open(RESUME_FILE, '_blank', 'noopener,noreferrer');
+      setResumeOpen(true);
       return;
     }
 
@@ -747,6 +748,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     if (target === 'home' || target === 'projects' || target === 'contact') {
       setActiveProjectId(null);
       setActiveMedia(null);
+      setResumeOpen(false);
       if (target === 'contact') setGravityEnabled(true);
       setPendingScroll(target);
       return;
@@ -844,7 +846,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
   return (
     <div
       ref={rootRef}
-      className={`antigravity-playground ${gravityEnabled ? 'is-gravity-on' : 'is-zero-g'} ${activeProjectId ? 'has-project-open' : ''}`}
+      className={`antigravity-playground ${gravityEnabled ? 'is-gravity-on' : 'is-zero-g'} ${activeProjectId || resumeOpen ? 'has-project-open' : ''}`}
       data-no-page-swipe="true"
       onPointerDownCapture={handlePointerDownCapture}
       onPointerMoveCapture={handlePointerMoveCapture}
@@ -996,41 +998,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                 </button>
               ))}
 
-              <button
-                className="antigravity-result-card resume-card resume-pdf-card"
-                type="button"
-                data-antigravity-body
-                data-open-target="resume"
-              >
-                <span className="result-index">PDF</span>
-                <span className="pdf-preview" aria-hidden="true">
-                  <div className="pdf-preview-visual">
-                    <div className="pdf-mock-header">
-                      <div className="pdf-mock-avatar" />
-                      <div className="pdf-mock-header-text">
-                        <div className="pdf-mock-line title" />
-                        <div className="pdf-mock-line subtitle" />
-                      </div>
-                    </div>
-                    <div className="pdf-mock-body">
-                      <div className="pdf-mock-section" />
-                      <div className="pdf-mock-line" style={{ width: '90%' }} />
-                      <div className="pdf-mock-line" style={{ width: '85%' }} />
-                      <div className="pdf-mock-section" />
-                      <div className="pdf-mock-line" style={{ width: '95%' }} />
-                      <div className="pdf-mock-line" style={{ width: '70%' }} />
-                    </div>
-                    <div className="pdf-mock-badge">
-                      <FileText size={14} />
-                      <span>RESUME PREVIEW</span>
-                    </div>
-                  </div>
-                </span>
-                <span className="result-copy">
-                  <strong>ByteDance Resume</strong>
-                  <small>孙启圣_字节跳动_简历 1.pdf</small>
-                </span>
-              </button>
+              {/* Removed redundant PDF resume button from works stack as requested */}
             </div>
           </div>
         </section>
@@ -1144,6 +1112,10 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
           onClose={() => setActiveProjectId(null)}
           onOpenMedia={index => setActiveMedia({ projectId: activeProject.id, index })}
         />
+      )}
+
+      {resumeOpen && (
+        <ResumeDetail onClose={() => setResumeOpen(false)} />
       )}
 
       {activeMedia && (
@@ -1366,5 +1338,118 @@ function MediaOverlay({
         </div>
       </div>
     </div>
+  );
+}
+
+function ResumeDetail({ onClose }: { onClose: () => void }) {
+  return (
+    <section className="antigravity-detail-overlay accent-teal resume-detail-overlay">
+      <button className="detail-back" type="button" onClick={onClose}>
+        <ArrowLeft size={17} />
+        Back
+      </button>
+
+      <div className="antigravity-project-detail is-resume-modal">
+        <div className="resume-modal-container">
+          {/* Header section */}
+          <header className="resume-header">
+            <div className="resume-avatar">孙</div>
+            <div className="resume-title-block">
+              <h2>孙启圣 / Andre Sun</h2>
+              <p className="resume-job-intent">产品与体验设计师 · 硕士在读</p>
+              <div className="resume-contacts">
+                <span>电话: 18715111179</span>
+                <span>邮箱: s18715111179@gmail.com</span>
+                <span>Github: github.com/Andresun-hyper</span>
+              </div>
+            </div>
+            <a className="resume-download-btn" href={RESUME_FILE} target="_blank" rel="noreferrer">
+              <FileText size={16} />
+              下载 PDF 原件
+            </a>
+          </header>
+
+          <hr className="resume-divider" />
+
+          {/* Details body */}
+          <div className="resume-body-grid">
+            <div className="resume-body-col left-col">
+              <section className="resume-section">
+                <h3>教育经历 / Education</h3>
+                <div className="resume-timeline-item">
+                  <div className="timeline-header">
+                    <strong>上海工程技术大学</strong>
+                    <span className="timeline-date">2024 - 至今</span>
+                  </div>
+                  <p>产品设计 · 硕士在读</p>
+                </div>
+                <div className="resume-timeline-item">
+                  <div className="timeline-header">
+                    <strong>安徽工程大学</strong>
+                    <span className="timeline-date">2020 - 2024</span>
+                  </div>
+                  <p>工业设计 · 学士学位</p>
+                </div>
+              </section>
+
+              <section className="resume-section">
+                <h3>专业技能 / Skillsets</h3>
+                <div className="skill-category">
+                  <strong>三维建模与渲染</strong>
+                  <p>Rhino, KeyShot, Blender</p>
+                </div>
+                <div className="skill-category">
+                  <strong>用户体验与交互原型</strong>
+                  <p>React Prototype, Vibe Coding, UI Mockup, User Flows</p>
+                </div>
+                <div className="skill-category">
+                  <strong>视觉与 AIGC 工作流</strong>
+                  <p>Photoshop, Illustrator, Midjourney, AI Video Generation</p>
+                </div>
+              </section>
+            </div>
+
+            <div className="resume-body-col right-col">
+              <section className="resume-section">
+                <h3>核心作品与项目经历 / Key Portfolios</h3>
+                
+                <div className="resume-project-item">
+                  <div className="project-header">
+                    <h4>1. 腕部康复评估交互系统 (UX Prototype)</h4>
+                    <span className="project-tag">UX / React / Video</span>
+                  </div>
+                  <p className="project-desc">
+                    面向居家康复训练人群，搭建的一套 React 交互原型样机。打通了开始前安全校准、动作过程中的即时识别与评分反馈、训练后的可视化复盘，验证体验节奏。
+                  </p>
+                  <p className="project-tools">工具链: React / Tailwind CSS / UI Mockup / Video Prototype</p>
+                </div>
+
+                <div className="resume-project-item">
+                  <div className="project-header">
+                    <h4>2. AQUARA 鱼缸清洁机器人 (Industrial Design)</h4>
+                    <span className="project-tag">ID / CMF / System</span>
+                  </div>
+                  <p className="project-desc">
+                    针对中大型鱼缸的维护痛点，设计了包含自动爬壁清洁、充电回仓与刷头自清洁一体化的机器人系统。输出六视图与高精场景渲染，论证形体与材质气质。
+                  </p>
+                  <p className="project-tools">工具链: Rhino / KeyShot / Photoshop / AIGC rendering</p>
+                </div>
+
+                <div className="resume-project-item">
+                  <div className="project-header">
+                    <h4>3. DROPLET 宠物运动水杯 (Pet Product Design)</h4>
+                    <span className="project-tag">ID / Scenario Research</span>
+                  </div>
+                  <p className="project-desc">
+                    户外运动宠物补水产品，研究户外场景下的宠物脱水与携带痛点，推导手持、喂水、电解质补充与饮水回流的结构与闭环体验。
+                  </p>
+                  <p className="project-tools">工具链: Sketch / Rhino / KeyShot / Midjourney</p>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
