@@ -311,6 +311,10 @@ interface MatterBody {
     x: number;
     y: number;
   };
+  velocity: {
+    x: number;
+    y: number;
+  };
   angle: number;
 }
 
@@ -664,7 +668,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
       mouseConstraint = null;
     };
 
-    if (gravityEnabled || activeProjectId || activeMedia) {
+    if (activeProjectId || activeMedia || resumeOpen) {
       Array.from(effectRoot?.querySelectorAll<HTMLElement>('[data-antigravity-body]') ?? [])
         .forEach(resetElementStyle);
       effectRoot?.classList.remove('is-physics-live');
@@ -682,13 +686,32 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
       cleanupWorld();
       MatterRef = Matter;
       engine = Matter.Engine.create();
+      
+      // 全局重力场参数设定
       engine.world.gravity.x = 0;
-      engine.world.gravity.y = -0.05;
-      engine.world.gravity.scale = 0.001;
+      if (gravityEnabled) {
+        // 重力模式：真实向下的地球重力
+        engine.world.gravity.y = 0.85;
+      } else {
+        // 无重力漂浮模式：微弱向上的太空浮力
+        engine.world.gravity.y = -0.045;
+      }
+      engine.world.gravity.scale = 0.0012;
 
       const width = Math.max(root.scrollWidth, window.innerWidth);
       const height = Math.max(root.scrollHeight, window.innerHeight);
+      
+      // 物理世界最外层边界
       Matter.World.add(engine.world, createBounds(Matter, width, height));
+
+      // 动态放置阻隔挡板，防止长页面环境下一开重力卡片直接掉到Contact底部穿帮
+      const homeBottom = homeRef.current ? homeRef.current.offsetTop + homeRef.current.offsetHeight : window.innerHeight;
+      const projectsBottom = projectsRef.current ? projectsRef.current.offsetTop + projectsRef.current.offsetHeight : window.innerHeight * 2;
+      
+      const homePlatform = Matter.Bodies.rectangle(width / 2, homeBottom - 12, width, 24, { isStatic: true, render: { visible: false } });
+      const projectsPlatform = Matter.Bodies.rectangle(width / 2, projectsBottom - 12, width, 24, { isStatic: true, render: { visible: false } });
+      
+      Matter.World.add(engine.world, [homePlatform, projectsPlatform]);
 
       const rootRect = root.getBoundingClientRect();
       const elements = Array.from(root.querySelectorAll<HTMLElement>('[data-antigravity-body]'));
@@ -713,6 +736,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
         element.style.zIndex = String(20 + index);
         element.style.willChange = 'transform';
 
+        // 零重力漂浮下高回弹，真实重力坠落堆积下低回弹高阻尼以保证叠放稳固
         const body = Matter.Bodies.rectangle(
           left + widthPx / 2,
           top + heightPx / 2,
@@ -720,18 +744,28 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
           heightPx + 16,
           {
             chamfer: { radius },
-            restitution: 0.6,
-            friction: 0.1,
-            frictionAir: 0.02,
+            restitution: gravityEnabled ? 0.28 : 0.62,
+            friction: 0.12,
+            frictionAir: gravityEnabled ? 0.03 : 0.015,
             density: 0.001,
           },
         );
 
-        Matter.Body.setVelocity(body, {
-          x: (Math.random() - 0.5) * 2.2,
-          y: -0.7 - Math.random() * 1.6,
-        });
-        Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.025);
+        if (gravityEnabled) {
+          // 重力开启时：提供微微左右摆动的初始下坠速度，让掉落更显丰富真实
+          Matter.Body.setVelocity(body, {
+            x: (Math.random() - 0.5) * 0.8,
+            y: 0.1 + Math.random() * 0.5,
+          });
+          Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.01);
+        } else {
+          // 无重力反引力：维持轻微上浮初始速度
+          Matter.Body.setVelocity(body, {
+            x: (Math.random() - 0.5) * 2.2,
+            y: -0.7 - Math.random() * 1.6,
+          });
+          Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.025);
+        }
 
         items.push({
           element,
@@ -769,10 +803,19 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
         frame += 1;
 
         items.forEach((item, index) => {
-          if (frame % 96 === index % 16) {
-            const forceX = Math.sin(frame * 0.018 + item.driftSeed) * 0.000035;
-            const forceY = -0.000015 - Math.cos(frame * 0.014 + item.driftSeed) * 0.000012;
-            Matter.Body.applyForce(item.body, item.body.position, { x: forceX, y: forceY });
+          if (!gravityEnabled) {
+            // 零重力漂浮：施加轻柔优雅的星际漂浮微风力
+            if (frame % 96 === index % 16) {
+              const forceX = Math.sin(frame * 0.018 + item.driftSeed) * 0.000035;
+              const forceY = -0.000015 - Math.cos(frame * 0.014 + item.driftSeed) * 0.000012;
+              Matter.Body.applyForce(item.body, item.body.position, { x: forceX, y: forceY });
+            }
+          } else {
+            // 真实重力：在近乎静止的堆叠状态下加上极其微弱的左右风力晃动，使卡片重叠交错更富拟真质感
+            if (frame % 120 === index % 20 && Math.abs(item.body.velocity.y) < 0.1) {
+              const driftForceX = (Math.random() - 0.5) * 0.00001;
+              Matter.Body.applyForce(item.body, item.body.position, { x: driftForceX, y: 0 });
+            }
           }
 
           const x = item.body.position.x - item.width / 2 - item.left;
