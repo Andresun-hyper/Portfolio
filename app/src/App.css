@@ -1702,7 +1702,7 @@ button {
 }
 
 .antigravity-brand {
-  display: inline-flex;
+  display: none !important; /* 全分辨率默认隐藏，为导航栏靠左分流腾出绝对安全宽度 */
   align-items: center;
   gap: 0.65rem;
   border-radius: 999px;
@@ -1727,6 +1727,7 @@ button {
   display: flex;
   gap: 0.55rem;
   pointer-events: none;
+  margin-right: auto !important; /* 全分辨率默认强力靠左，确保与右上角 fixed 开关彻底分开，永不重合 */
 }
 
 .antigravity-nav a,
