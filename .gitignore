@@ -6,3 +6,4 @@ app/dist/
 Thumbs.db
 validation-*.png
 *.log
+.netlify/

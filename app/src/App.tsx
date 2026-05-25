@@ -599,7 +599,7 @@ function App() {
         </button>
         <div className="topbar-actions">
           <button className="gravity-launch" type="button" onClick={() => setAntigravityOpen(true)}>
-            Antigravity
+            Portfolio
           </button>
           <div className="topbar-meta">
             <span>{String(pager.currentIndex + 1).padStart(2, '0')}</span>
@@ -786,7 +786,7 @@ function CoverSlide({
         </p>
         <div className="gravity-guide-tip">
           <span className="guide-pulse-dot" />
-          <span>点击右上角 <strong className="glow-text">Antigravity</strong> 按钮，开启全网页物理反重力浮动交互探索</span>
+          <span>点击右上角 <strong className="glow-text">Portfolio</strong> 按钮，开启全网页物理反重力浮动交互探索</span>
         </div>
         <div className="track-filter" aria-label="Portfolio filters">
           {(Object.keys(trackLabels) as TrackFilter[]).map(track => (
