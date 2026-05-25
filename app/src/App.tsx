@@ -1076,7 +1076,7 @@ function ContactSlide() {
         <div className="contact-grid">
           <div>
             <span>EDUCATION</span>
-            <strong>上海工程技术大学 / 产品设计 / 硕士在读</strong>
+            <strong>上海工程技术大学 · 产品设计硕士在读 / 亳州学院 · 产品设计本科毕业</strong>
           </div>
           <div>
             <span>FOCUS</span>

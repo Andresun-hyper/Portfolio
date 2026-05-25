@@ -1379,37 +1379,121 @@ function ResumeDetail({ onClose }: { onClose: () => void }) {
                 <div className="resume-timeline-item">
                   <div className="timeline-header">
                     <strong>上海工程技术大学</strong>
-                    <span className="timeline-date">2024 - 至今</span>
+                    <span className="timeline-date">2025.09 - 至今</span>
                   </div>
-                  <p>产品设计 · 硕士在读</p>
+                  <p>产品设计 · 全日制研究生 · 在读</p>
+                  <p className="resume-course-detail">主修：设计方法论、用户研究、设计趋势研究、陶瓷产品设计、设计形态与构成研究、产品造型设计、综合韩语等</p>
                 </div>
                 <div className="resume-timeline-item">
                   <div className="timeline-header">
-                    <strong>安徽工程大学</strong>
-                    <span className="timeline-date">2020 - 2024</span>
+                    <strong>亳州学院</strong>
+                    <span className="timeline-date">2021.09 - 2025.06</span>
                   </div>
-                  <p>工业设计 · 学士学位</p>
+                  <p>产品设计 · 全日制本科</p>
+                  <p className="resume-course-detail">主修：CMF设计研究、模型制作与工艺、计算机辅助产品设计、家具设计、3D建模与打印、产品开发设计、产品语义设计等</p>
                 </div>
               </section>
 
               <section className="resume-section">
                 <h3>专业技能 / Skillsets</h3>
                 <div className="skill-category">
-                  <strong>三维建模与渲染</strong>
-                  <p>Rhino, KeyShot, Blender</p>
+                  <strong>UI/UX 设计</strong>
+                  <p>具备优秀的 UI 设计能力，熟练使用 Figma 进行界面设计与原型制作，掌握交互设计思维，能准确呈现设计策略的意图。</p>
                 </div>
                 <div className="skill-category">
-                  <strong>用户体验与交互原型</strong>
-                  <p>React Prototype, Vibe Coding, UI Mockup, User Flows</p>
+                  <strong>AIGC 工具</strong>
+                  <p>熟悉 Stable Diffusion、Midjourney 等文生图工具，能搭建 ComfyUI 基础工作流，具备 AI 美学数据建设与标准制定的实操经验。</p>
                 </div>
                 <div className="skill-category">
-                  <strong>视觉与 AIGC 工作流</strong>
-                  <p>Photoshop, Illustrator, Midjourney, AI Video Generation</p>
+                  <strong>3D建模渲染</strong>
+                  <p>熟练使用 Rhino、Blender 进行产品建模与渲染，掌握 KeyShot 产品级高精材质与光影渲染技术。</p>
+                </div>
+                <div className="skill-category">
+                  <strong>平面设计</strong>
+                  <p>精通 Photoshop、Illustrator，具备完整的视觉设计能力与品牌设计思维。</p>
+                </div>
+                <div className="skill-category">
+                  <strong>用户研究</strong>
+                  <p>系统学习用户研究方法论，熟练掌握多维度的用户洞察、场景调研与痛点需求分析能力。</p>
+                </div>
+                <div className="skill-category">
+                  <strong>3D打印</strong>
+                  <p>能独立操作熔融沉积（FDM）及光固化（SLA）3D打印机完成硬件与结构的原型制作。</p>
                 </div>
               </section>
             </div>
 
             <div className="resume-body-col right-col">
+              <section className="resume-section">
+                <h3>大学经历 / Campus Experience</h3>
+                
+                <div className="resume-experience-item">
+                  <div className="experience-header">
+                    <h4>产品快题手绘课程助教</h4>
+                    <span className="experience-date">2025.02 - 2025.03</span>
+                  </div>
+                  <ul className="experience-bullets">
+                    <li>担任研究生阶段产品快题手绘课程助教，协助导师完成16课时课程大纲设计与教学实施</li>
+                    <li>独立承担每周6课时随堂手绘示范、作业批改及一对一答疑，累计辅导40+名本科生</li>
+                    <li>学生作业优秀率较上学期提升25%，获导师“认真负责、示范清晰”的高度评价</li>
+                  </ul>
+                </div>
+
+                <div className="resume-experience-item">
+                  <div className="experience-header">
+                    <h4>安徽省大学生摄影比赛 · 校赛负责人</h4>
+                    <span className="experience-date">2023.09 - 2023.10</span>
+                  </div>
+                  <ul className="experience-bullets">
+                    <li>作为校赛总负责人统筹安徽省大学生摄影比赛校内选拔，独立设计报名-评审全流程机制</li>
+                    <li>对接3位评审老师，协调80+份参赛作品收集、分数统计与排名核算，确保赛事零差错</li>
+                    <li>承担官网宣传摄影，产出20+张活动现场照片被学校官方平台采用，阅读量累计2,000+</li>
+                  </ul>
+                </div>
+
+                <div className="resume-experience-item">
+                  <div className="experience-header">
+                    <h4>校级易班工作站 · 技术部干事</h4>
+                    <span className="experience-date">2021.09 - 2023.06</span>
+                  </div>
+                  <ul className="experience-bullets">
+                    <li>负责易班APP网页端视觉运营，独立承担全年6+个传统节日专题页Banner设计及上线</li>
+                    <li>作品累计曝光覆盖全校12,000+师生；承担后台舆情监测，日均处理反馈信息30+条</li>
+                    <li>保障平台内容合规率达99%+，积极参与迎新工作、参观军事基地等多项宣传活动</li>
+                  </ul>
+                </div>
+              </section>
+
+              <section className="resume-section">
+                <h3>荣誉奖励 / Selected Honors</h3>
+                <div className="resume-honors-grid">
+                  <div className="honor-tag-item">
+                    <span className="honor-badge is-gold">国家级</span>
+                    <strong>大学生创新创业大赛 · 筹划项目被评为国家级</strong>
+                  </div>
+                  <div className="honor-tag-item">
+                    <span className="honor-badge">省级</span>
+                    <strong>中国大学生计算机设计大赛 · 省级二等奖 (校级二等奖2项、三等奖2项)</strong>
+                  </div>
+                  <div className="honor-tag-item">
+                    <span className="honor-badge">省级</span>
+                    <strong>安徽省工业设计大赛 “铜官府杯”专项赛银奖 (省级三等奖1项、校级一等奖1项)</strong>
+                  </div>
+                  <div className="honor-tag-item">
+                    <span className="honor-badge">省级</span>
+                    <strong>安徽省大学生摄影作品大赛 · 省级二等奖 (校级三等奖1项)</strong>
+                  </div>
+                  <div className="honor-tag-item">
+                    <span className="honor-badge">省/校级</span>
+                    <strong>安徽省原创动漫大赛 · 校级二等奖1项、三等奖1项</strong>
+                  </div>
+                  <div className="honor-tag-item">
+                    <span className="honor-badge">优秀奖</span>
+                    <strong>安徽省高校校园原创文化精品展演 · 优秀奖</strong>
+                  </div>
+                </div>
+              </section>
+
               <section className="resume-section">
                 <h3>核心作品与项目经历 / Key Portfolios</h3>
                 
