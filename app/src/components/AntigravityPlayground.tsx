@@ -512,6 +512,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
   });
   const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
   const [resumeOpen, setResumeOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<'home' | 'projects' | 'contact'>('home');
   const activeSuggestion = SEARCH_SUGGESTIONS[suggestionIndex];
   const activeProject = useMemo(
     () => projects.find(project => project.id === activeProjectId) ?? projects[0],
@@ -533,6 +534,32 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
 
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const observerOptions = {
+      root: document.querySelector('.antigravity-scroll'),
+      rootMargin: '-30% 0px -30% 0px', // 当板块在视口中段时点亮对应的导航按钮
+      threshold: 0.1
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          if (id === 'gravity-home') setActiveSection('home');
+          else if (id === 'gravity-projects') setActiveSection('projects');
+          else if (id === 'gravity-contact') setActiveSection('contact');
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    if (homeRef.current) observer.observe(homeRef.current);
+    if (projectsRef.current) observer.observe(projectsRef.current);
+    if (contactRef.current) observer.observe(contactRef.current);
+
+    return () => observer.disconnect();
+  }, [resetKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -750,6 +777,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
       setActiveMedia(null);
       setResumeOpen(false);
       if (target === 'contact') setGravityEnabled(true);
+      setActiveSection(target); // 立即同步更新按钮的选中特写
       setPendingScroll(target);
       return;
     }
@@ -1098,9 +1126,27 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
       </main>
 
       <footer className="antigravity-footer">
-        <button type="button" onClick={() => openTarget('home')}>Home</button>
-        <button type="button" onClick={() => openTarget('projects')}>Works</button>
-        <button type="button" onClick={() => openTarget('contact')}>Contact</button>
+        <button 
+          type="button" 
+          className={activeSection === 'home' ? 'active' : ''} 
+          onClick={() => { openTarget('home'); setActiveSection('home'); }}
+        >
+          Home
+        </button>
+        <button 
+          type="button" 
+          className={activeSection === 'projects' ? 'active' : ''} 
+          onClick={() => { openTarget('projects'); setActiveSection('projects'); }}
+        >
+          Works
+        </button>
+        <button 
+          type="button" 
+          className={activeSection === 'contact' ? 'active' : ''} 
+          onClick={() => { openTarget('contact'); setActiveSection('contact'); }}
+        >
+          Contact
+        </button>
       </footer>
 
       {activeProjectId && (

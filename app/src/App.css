@@ -1663,6 +1663,17 @@ button {
   bottom: clamp(18px, 3vh, 34px);
   justify-content: center;
   gap: 0.7rem;
+  z-index: 1300 !important; /* 强力提升层级至 controls 级别，确保超越 Matter.js canvas 遮盖层 */
+}
+
+/* 底栏药丸导航按钮选中高亮特写 */
+.antigravity-footer button.active {
+  background: var(--ag-teal, #19b895) !important;
+  color: #ffffff !important;
+  border-color: var(--ag-teal, #19b895) !important;
+  box-shadow: 0 8px 24px rgba(25, 184, 149, 0.35) !important;
+  transform: translateY(-2px);
+  pointer-events: auto !important;
 }
 
 .antigravity-home {
