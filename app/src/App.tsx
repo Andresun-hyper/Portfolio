@@ -13,6 +13,7 @@ import {
   X,
   ZoomIn,
 } from 'lucide-react';
+import AntigravityPlayground from './components/AntigravityPlayground';
 import './App.css';
 
 type SlideKind = 'cover' | 'contents' | 'project' | 'contact';
@@ -546,8 +547,9 @@ function App() {
     droplet: 'overview',
   });
   const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
+  const [antigravityOpen, setAntigravityOpen] = useState(false);
   const triggerRef = useRef<HTMLElement | null>(null);
-  const pager = useDirectionalPager(slides.length, Boolean(activeMedia));
+  const pager = useDirectionalPager(slides.length, Boolean(activeMedia) || antigravityOpen);
   const activeSlide = slides[pager.currentIndex];
 
   useEffect(() => {
@@ -595,10 +597,15 @@ function App() {
           <span>ANDRE SUN</span>
           <small>PORTFOLIO</small>
         </button>
-        <div className="topbar-meta">
-          <span>{String(pager.currentIndex + 1).padStart(2, '0')}</span>
-          <span>/</span>
-          <span>{String(slides.length).padStart(2, '0')}</span>
+        <div className="topbar-actions">
+          <button className="gravity-launch" type="button" onClick={() => setAntigravityOpen(true)}>
+            PORTFOLIO
+          </button>
+          <div className="topbar-meta">
+            <span>{String(pager.currentIndex + 1).padStart(2, '0')}</span>
+            <span>/</span>
+            <span>{String(slides.length).padStart(2, '0')}</span>
+          </div>
         </div>
       </header>
 
@@ -682,6 +689,11 @@ function App() {
           onPrev={() => moveMedia('prev')}
           onNext={() => moveMedia('next')}
         />,
+        document.body,
+      )}
+
+      {antigravityOpen && createPortal(
+        <AntigravityPlayground onClose={() => setAntigravityOpen(false)} />,
         document.body,
       )}
     </main>
