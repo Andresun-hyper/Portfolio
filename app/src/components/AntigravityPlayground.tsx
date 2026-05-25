@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowDown,
   ArrowLeft,
@@ -43,6 +43,7 @@ type Accent = 'teal' | 'gold' | 'black';
 type ProjectId = 'wrist' | 'aquara' | 'droplet';
 type OpenTarget = 'home' | 'projects' | 'contact' | 'resume' | 'github' | 'search' | ProjectId;
 type ProjectTabKey = 'overview' | 'process' | 'output' | 'ai';
+type SectionId = 'home' | 'projects' | 'contact';
 
 interface GalleryItem {
   src: string;
@@ -311,10 +312,6 @@ interface MatterBody {
     x: number;
     y: number;
   };
-  velocity: {
-    x: number;
-    y: number;
-  };
   angle: number;
 }
 
@@ -497,7 +494,6 @@ function getProjectMedia(project: Project): GalleryItem[] {
 
 export default function AntigravityPlayground({ onClose }: { onClose: () => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const homeRef = useRef<HTMLElement>(null);
   const projectsRef = useRef<HTMLElement>(null);
@@ -509,7 +505,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
   const [gravityEnabled, setGravityEnabled] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const [activeProjectId, setActiveProjectId] = useState<ProjectId | null>(null);
-  const [pendingScroll, setPendingScroll] = useState<'home' | 'projects' | 'contact' | null>(null);
+  const [pendingScroll, setPendingScroll] = useState<SectionId | null>(null);
   const [activeTabs, setActiveTabs] = useState<Record<ProjectId, ProjectTabKey>>({
     wrist: 'overview',
     aquara: 'overview',
@@ -517,22 +513,25 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
   });
   const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
   const [resumeOpen, setResumeOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<'home' | 'projects' | 'contact'>('home');
+  const [activeSection, setActiveSection] = useState<SectionId>('home');
+  const gravityEnabledRef = useRef(gravityEnabled);
+  const activeSectionRef = useRef(activeSection);
+  const activeProjectIdRef = useRef(activeProjectId);
+  const activeMediaRef = useRef(activeMedia);
+  const resumeOpenRef = useRef(resumeOpen);
   const activeSuggestion = SEARCH_SUGGESTIONS[suggestionIndex];
   const activeProject = useMemo(
     () => projects.find(project => project.id === activeProjectId) ?? projects[0],
     [activeProjectId],
   );
 
-  const activeSectionRef = useRef(activeSection);
-  const activeProjectIdRef = useRef(activeProjectId);
-  const resumeOpenRef = useRef(resumeOpen);
-
   useEffect(() => {
+    gravityEnabledRef.current = gravityEnabled;
     activeSectionRef.current = activeSection;
     activeProjectIdRef.current = activeProjectId;
+    activeMediaRef.current = activeMedia;
     resumeOpenRef.current = resumeOpen;
-  }, [activeSection, activeProjectId, resumeOpen]);
+  }, [activeMedia, activeProjectId, activeSection, gravityEnabled, resumeOpen]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -551,87 +550,23 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
   }, []);
 
   useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return undefined;
+    const root = rootRef.current;
+    if (!root) return undefined;
 
-    let wheelAccumulator = 0;
-    let lastWheelSign = 0;
-    let isAnimating = false;
-
-    const onWheel = (event: WheelEvent) => {
-      // 详情弹窗或简历打开时允许原生的内部局部滚动，跳过翻页拦截
-      if (activeProjectIdRef.current || resumeOpenRef.current) {
-        return;
-      }
-
-      // 强力屏蔽浏览器默认的连续无规则滚动以保证幻灯片吸附手感
-      event.preventDefault();
-
-      if (isAnimating) return;
-
-      const axisDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-      const sign = Math.sign(axisDelta);
-      if (sign === 0) return;
-
-      if (sign !== lastWheelSign) {
-        wheelAccumulator = 0;
-      }
-      lastWheelSign = sign;
-      wheelAccumulator += Math.abs(axisDelta);
-
-      // 与普通模式的88阈值完全对齐
-      if (wheelAccumulator > 88) {
-        wheelAccumulator = 0;
-
-        const sections: ('home' | 'projects' | 'contact')[] = ['home', 'projects', 'contact'];
-        const currentIndex = sections.indexOf(activeSectionRef.current);
-        let targetIndex = currentIndex;
-
-        if (sign > 0) {
-          if (currentIndex < sections.length - 1) {
-            targetIndex = currentIndex + 1;
-          }
-        } else if (sign < 0) {
-          if (currentIndex > 0) {
-            targetIndex = currentIndex - 1;
-          }
-        }
-
-        if (targetIndex !== currentIndex) {
-          const nextSection = sections[targetIndex];
-          isAnimating = true;
-          scrollTo(nextSection);
-          setActiveSection(nextSection);
-
-          window.setTimeout(() => {
-            isAnimating = false;
-          }, 800);
-        }
-      }
-    };
-
-    scrollContainer.addEventListener('wheel', onWheel, { passive: false });
-    return () => {
-      scrollContainer.removeEventListener('wheel', onWheel);
-    };
-  }, []);
-
-  useEffect(() => {
     const observerOptions = {
-      root: document.querySelector('.antigravity-scroll'),
-      rootMargin: '-30% 0px -30% 0px', // 当板块在视口中段时点亮对应的导航按钮
-      threshold: 0.1
+      root,
+      rootMargin: '-30% 0px -30% 0px',
+      threshold: 0.1,
     };
 
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id;
-          if (id === 'gravity-home') setActiveSection('home');
-          else if (id === 'gravity-projects') setActiveSection('projects');
-          else if (id === 'gravity-contact') setActiveSection('contact');
-        }
-      });
+      const visibleEntry = entries.find(entry => entry.isIntersecting);
+      if (!visibleEntry) return;
+
+      const id = visibleEntry.target.id;
+      if (id === 'gravity-home') setActiveSection('home');
+      else if (id === 'gravity-projects') setActiveSection('projects');
+      else if (id === 'gravity-contact') setActiveSection('contact');
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
@@ -668,7 +603,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
       mouseConstraint = null;
     };
 
-    if (activeProjectId || activeMedia || resumeOpen) {
+    if (gravityEnabled || activeProjectId || activeMedia) {
       Array.from(effectRoot?.querySelectorAll<HTMLElement>('[data-antigravity-body]') ?? [])
         .forEach(resetElementStyle);
       effectRoot?.classList.remove('is-physics-live');
@@ -686,32 +621,13 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
       cleanupWorld();
       MatterRef = Matter;
       engine = Matter.Engine.create();
-      
-      // 全局重力场参数设定
       engine.world.gravity.x = 0;
-      if (gravityEnabled) {
-        // 重力模式：真实向下的地球重力
-        engine.world.gravity.y = 0.85;
-      } else {
-        // 无重力漂浮模式：微弱向上的太空浮力
-        engine.world.gravity.y = -0.045;
-      }
-      engine.world.gravity.scale = 0.0012;
+      engine.world.gravity.y = -0.05;
+      engine.world.gravity.scale = 0.001;
 
       const width = Math.max(root.scrollWidth, window.innerWidth);
       const height = Math.max(root.scrollHeight, window.innerHeight);
-      
-      // 物理世界最外层边界
       Matter.World.add(engine.world, createBounds(Matter, width, height));
-
-      // 动态放置阻隔挡板，防止长页面环境下一开重力卡片直接掉到Contact底部穿帮
-      const homeBottom = homeRef.current ? homeRef.current.offsetTop + homeRef.current.offsetHeight : window.innerHeight;
-      const projectsBottom = projectsRef.current ? projectsRef.current.offsetTop + projectsRef.current.offsetHeight : window.innerHeight * 2;
-      
-      const homePlatform = Matter.Bodies.rectangle(width / 2, homeBottom - 12, width, 24, { isStatic: true, render: { visible: false } });
-      const projectsPlatform = Matter.Bodies.rectangle(width / 2, projectsBottom - 12, width, 24, { isStatic: true, render: { visible: false } });
-      
-      Matter.World.add(engine.world, [homePlatform, projectsPlatform]);
 
       const rootRect = root.getBoundingClientRect();
       const elements = Array.from(root.querySelectorAll<HTMLElement>('[data-antigravity-body]'));
@@ -736,7 +652,6 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
         element.style.zIndex = String(20 + index);
         element.style.willChange = 'transform';
 
-        // 零重力漂浮下高回弹，真实重力坠落堆积下低回弹高阻尼以保证叠放稳固
         const body = Matter.Bodies.rectangle(
           left + widthPx / 2,
           top + heightPx / 2,
@@ -744,28 +659,18 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
           heightPx + 16,
           {
             chamfer: { radius },
-            restitution: gravityEnabled ? 0.28 : 0.62,
-            friction: 0.12,
-            frictionAir: gravityEnabled ? 0.03 : 0.015,
+            restitution: 0.6,
+            friction: 0.1,
+            frictionAir: 0.02,
             density: 0.001,
           },
         );
 
-        if (gravityEnabled) {
-          // 重力开启时：提供微微左右摆动的初始下坠速度，让掉落更显丰富真实
-          Matter.Body.setVelocity(body, {
-            x: (Math.random() - 0.5) * 0.8,
-            y: 0.1 + Math.random() * 0.5,
-          });
-          Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.01);
-        } else {
-          // 无重力反引力：维持轻微上浮初始速度
-          Matter.Body.setVelocity(body, {
-            x: (Math.random() - 0.5) * 2.2,
-            y: -0.7 - Math.random() * 1.6,
-          });
-          Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.025);
-        }
+        Matter.Body.setVelocity(body, {
+          x: (Math.random() - 0.5) * 2.2,
+          y: -0.7 - Math.random() * 1.6,
+        });
+        Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.025);
 
         items.push({
           element,
@@ -803,19 +708,10 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
         frame += 1;
 
         items.forEach((item, index) => {
-          if (!gravityEnabled) {
-            // 零重力漂浮：施加轻柔优雅的星际漂浮微风力
-            if (frame % 96 === index % 16) {
-              const forceX = Math.sin(frame * 0.018 + item.driftSeed) * 0.000035;
-              const forceY = -0.000015 - Math.cos(frame * 0.014 + item.driftSeed) * 0.000012;
-              Matter.Body.applyForce(item.body, item.body.position, { x: forceX, y: forceY });
-            }
-          } else {
-            // 真实重力：在近乎静止的堆叠状态下加上极其微弱的左右风力晃动，使卡片重叠交错更富拟真质感
-            if (frame % 120 === index % 20 && Math.abs(item.body.velocity.y) < 0.1) {
-              const driftForceX = (Math.random() - 0.5) * 0.00001;
-              Matter.Body.applyForce(item.body, item.body.position, { x: driftForceX, y: 0 });
-            }
+          if (frame % 96 === index % 16) {
+            const forceX = Math.sin(frame * 0.018 + item.driftSeed) * 0.000035;
+            const forceY = -0.000015 - Math.cos(frame * 0.014 + item.driftSeed) * 0.000012;
+            Matter.Body.applyForce(item.body, item.body.position, { x: forceX, y: forceY });
           }
 
           const x = item.body.position.x - item.width / 2 - item.left;
@@ -854,16 +750,88 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     };
   }, [activeMedia, activeProjectId, gravityEnabled, resetKey]);
 
-  const scrollTo = (section: 'home' | 'projects' | 'contact') => {
-    const scrollContainer = scrollRef.current;
+  const scrollTo = useCallback((section: SectionId) => {
+    const root = rootRef.current;
     const target = {
       home: homeRef.current,
       projects: projectsRef.current,
       contact: contactRef.current,
     }[section];
-    if (!scrollContainer || !target) return;
-    scrollContainer.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
-  };
+    if (!root || !target) return;
+    root.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+
+    const sections: SectionId[] = ['home', 'projects', 'contact'];
+    let wheelAccumulator = 0;
+    let lastWheelSign = 0;
+    let isAnimating = false;
+    let unlockTimer = 0;
+
+    const getNearestSection = () => {
+      const sectionNodes = {
+        home: homeRef.current,
+        projects: projectsRef.current,
+        contact: contactRef.current,
+      };
+      return sections.reduce((nearest, section) => {
+        const currentDistance = Math.abs((sectionNodes[section]?.offsetTop ?? 0) - root.scrollTop);
+        const nearestDistance = Math.abs((sectionNodes[nearest]?.offsetTop ?? 0) - root.scrollTop);
+        return currentDistance < nearestDistance ? section : nearest;
+      }, activeSectionRef.current);
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      if (
+        gravityEnabledRef.current ||
+        activeProjectIdRef.current ||
+        activeMediaRef.current ||
+        resumeOpenRef.current
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      if (isAnimating) return;
+
+      const axisDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      const sign = Math.sign(axisDelta);
+      if (sign === 0) return;
+
+      if (sign !== lastWheelSign) {
+        wheelAccumulator = 0;
+      }
+      lastWheelSign = sign;
+      wheelAccumulator += Math.abs(axisDelta);
+
+      if (wheelAccumulator < 72) return;
+      wheelAccumulator = 0;
+
+      const currentIndex = sections.indexOf(getNearestSection());
+      const targetIndex = Math.min(sections.length - 1, Math.max(0, currentIndex + sign));
+      if (targetIndex === currentIndex) return;
+
+      const nextSection = sections[targetIndex];
+      isAnimating = true;
+      activeSectionRef.current = nextSection;
+      setActiveSection(nextSection);
+      scrollTo(nextSection);
+
+      if (unlockTimer) window.clearTimeout(unlockTimer);
+      unlockTimer = window.setTimeout(() => {
+        isAnimating = false;
+      }, 760);
+    };
+
+    root.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    return () => {
+      root.removeEventListener('wheel', onWheel, { capture: true });
+      if (unlockTimer) window.clearTimeout(unlockTimer);
+    };
+  }, [scrollTo]);
 
   useEffect(() => {
     if (!pendingScroll || activeProjectId) return undefined;
@@ -874,7 +842,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     }, 80);
 
     return () => window.clearTimeout(timer);
-  }, [activeProjectId, gravityEnabled, pendingScroll]);
+  }, [activeProjectId, gravityEnabled, pendingScroll, scrollTo]);
 
   const openTarget = (target: OpenTarget) => {
     if (target === 'github') {
@@ -1035,7 +1003,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
         <X size={18} />
       </button>
 
-      <main ref={scrollRef} className="antigravity-scroll">
+      <main className="antigravity-scroll">
         <section className="antigravity-section antigravity-home" id="gravity-home" ref={homeRef}>
           <div className="antigravity-section-inner antigravity-hero">
             <button className="antigravity-logo" type="button" data-antigravity-body data-open-target="contact">
@@ -1059,7 +1027,6 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                 value={query}
                 onChange={event => setQuery(event.target.value)}
                 aria-label="Search portfolio"
-                autoComplete="off"
               />
               <MousePointer2 size={18} />
             </form>

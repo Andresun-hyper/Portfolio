@@ -1611,13 +1611,14 @@ button {
   position: fixed;
   inset: 0;
   z-index: 1100;
-  overflow: hidden !important;
+  overflow-x: hidden;
+  overflow-y: auto !important;
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(242, 245, 244, 0.94)),
     #f4f6f5;
   color: var(--ag-ink);
   font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  touch-action: none; /* 既然由 scroll 容器承载手势，外层不需要 touch-action pan-y */
+  touch-action: pan-y;
   user-select: none;
 }
 
@@ -3262,7 +3263,8 @@ a:active {
 
 .antigravity-playground {
   display: block;
-  overflow: hidden !important;
+  overflow-x: hidden;
+  overflow-y: auto;
   scroll-behavior: smooth;
   background:
     linear-gradient(90deg, rgba(16, 21, 24, 0.028) 1px, transparent 1px),
@@ -3272,11 +3274,7 @@ a:active {
 }
 
 .antigravity-playground.has-project-open {
-  overflow: hidden !important;
-}
-
-.antigravity-playground.has-project-open .antigravity-scroll {
-  overflow-y: hidden !important; /* 确保详情或简历弹窗打开时底层scroll容器完美锁定不能滚动 */
+  overflow: hidden;
 }
 
 .antigravity-playground .antigravity-grid {
@@ -3287,19 +3285,12 @@ a:active {
 .antigravity-scroll {
   position: relative;
   z-index: 2;
-  scroll-snap-type: y mandatory; /* 强力滚轮吸附，实现平滑段落翻页 */
-  scroll-behavior: smooth;
-  height: 100vh; /* 确保滚动区域与视口完美合一以正确捕获吸附点 */
-  overflow-y: auto !important;
 }
 
 .antigravity-section {
   position: relative;
   min-height: 100vh;
   padding: clamp(92px, 11vh, 132px) clamp(28px, 5vw, 78px) clamp(86px, 10vh, 118px);
-  scroll-snap-align: start; /* 视口顶部对齐吸附点 */
-  scroll-snap-stop: always; /* 强制滚轮翻页在段落停顿，防止连跨多页 */
-  box-sizing: border-box;
 }
 
 .antigravity-section + .antigravity-section {
