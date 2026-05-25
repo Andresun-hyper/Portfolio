@@ -3285,12 +3285,19 @@ a:active {
 .antigravity-scroll {
   position: relative;
   z-index: 2;
+  scroll-snap-type: y mandatory; /* 强力滚轮吸附，实现平滑段落翻页 */
+  scroll-behavior: smooth;
+  height: 100vh; /* 确保滚动区域与视口完美合一以正确捕获吸附点 */
+  overflow-y: auto !important;
 }
 
 .antigravity-section {
   position: relative;
   min-height: 100vh;
   padding: clamp(92px, 11vh, 132px) clamp(28px, 5vw, 78px) clamp(86px, 10vh, 118px);
+  scroll-snap-align: start; /* 视口顶部对齐吸附点 */
+  scroll-snap-stop: always; /* 强制滚轮翻页在段落停顿，防止连跨多页 */
+  box-sizing: border-box;
 }
 
 .antigravity-section + .antigravity-section {

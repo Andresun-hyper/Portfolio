@@ -21,7 +21,7 @@ const RESUME_FILE = './孙启圣_字节跳动_简历 1.pdf';
 const GITHUB_URL = 'https://github.com/Andresun-hyper';
 
 const SEARCH_SUGGESTIONS = [
-  '孙启圣 ByteDance PDF Resume',
+  '孙启圣 PDF Resume',
   'Wrist Rehabilitation',
   'AQUARA Robot',
   'DROPLET Bottle',
