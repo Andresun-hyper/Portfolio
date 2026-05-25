@@ -611,8 +611,8 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
         const body = Matter.Bodies.rectangle(
           left + widthPx / 2,
           top + heightPx / 2,
-          widthPx,
-          heightPx,
+          widthPx + 16,
+          heightPx + 16,
           {
             chamfer: { radius },
             restitution: 0.6,
