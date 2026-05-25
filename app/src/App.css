@@ -2986,8 +2986,8 @@ a:active {
     right: 18px;
   }
 
-  .antigravity-brand strong {
-    display: none;
+  .antigravity-brand {
+    display: none !important;
   }
 
   .antigravity-nav a,
@@ -3168,7 +3168,7 @@ a:active {
   }
 
   .antigravity-nav button:nth-child(3) {
-    display: none;
+    display: inline-flex !important;
   }
 
   .antigravity-logo strong {
