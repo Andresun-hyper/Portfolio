@@ -999,15 +999,32 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
               <button
                 className="antigravity-result-card resume-card resume-pdf-card"
                 type="button"
-                onClick={() => {
-                  if (gravityEnabled) openTarget('resume');
-                }}
                 data-antigravity-body
                 data-open-target="resume"
               >
                 <span className="result-index">PDF</span>
                 <span className="pdf-preview" aria-hidden="true">
-                  <iframe src={`${RESUME_FILE}#toolbar=0&navpanes=0&view=FitH`} title="Sun Qisheng resume PDF preview" />
+                  <div className="pdf-preview-visual">
+                    <div className="pdf-mock-header">
+                      <div className="pdf-mock-avatar" />
+                      <div className="pdf-mock-header-text">
+                        <div className="pdf-mock-line title" />
+                        <div className="pdf-mock-line subtitle" />
+                      </div>
+                    </div>
+                    <div className="pdf-mock-body">
+                      <div className="pdf-mock-section" />
+                      <div className="pdf-mock-line" style={{ width: '90%' }} />
+                      <div className="pdf-mock-line" style={{ width: '85%' }} />
+                      <div className="pdf-mock-section" />
+                      <div className="pdf-mock-line" style={{ width: '95%' }} />
+                      <div className="pdf-mock-line" style={{ width: '70%' }} />
+                    </div>
+                    <div className="pdf-mock-badge">
+                      <FileText size={14} />
+                      <span>RESUME PREVIEW</span>
+                    </div>
+                  </div>
                 </span>
                 <span className="result-copy">
                   <strong>ByteDance Resume</strong>
@@ -1039,7 +1056,54 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
               </article>
 
               <div className="contact-resume-card" data-antigravity-body data-open-target="resume">
-                <iframe src={`${RESUME_FILE}#toolbar=0&navpanes=0&view=FitH`} title="Sun Qisheng resume PDF" />
+                <div className="premium-resume-mockup">
+                  <div className="resume-mock-top">
+                    <div className="resume-mock-meta">
+                      <h3>孙启圣 / Andre Sun</h3>
+                      <p className="resume-mock-tagline">产品设计硕士在读 · 寻求产品与体验设计相关机会</p>
+                    </div>
+                    <span className="resume-mock-avatar-box">孙</span>
+                  </div>
+                  
+                  <div className="resume-mock-grid">
+                    <div className="resume-mock-col left">
+                      <section>
+                        <h4>教育经历 / Education</h4>
+                        <div className="resume-mock-item">
+                          <strong>上海工程技术大学</strong>
+                          <span>产品设计硕士 · 在读</span>
+                        </div>
+                      </section>
+                      <section>
+                        <h4>专业技能 / Skills</h4>
+                        <div className="resume-skill-list">
+                          <span>Rhino</span>
+                          <span>KeyShot</span>
+                          <span>React Prototype</span>
+                          <span>AIGC Workflow</span>
+                          <span>CMF</span>
+                        </div>
+                      </section>
+                    </div>
+                    <div className="resume-mock-col right">
+                      <section>
+                        <h4>核心项目 / Selected Projects</h4>
+                        <div className="resume-mock-project">
+                          <strong>1. 腕部康复评估交互系统 (UX)</strong>
+                          <p>居家安全校验、动作实时评分、训练结果可视化的交互体验闭环。</p>
+                        </div>
+                        <div className="resume-mock-project">
+                          <strong>2. AQUARA 鱼缸清洁机器人 (ID)</strong>
+                          <p>自动爬壁、自清洁、充电回仓一体化设计。</p>
+                        </div>
+                      </section>
+                    </div>
+                  </div>
+                  
+                  <div className="resume-mock-footer">
+                    <span>点击一键查看高清 PDF 简历文档</span>
+                  </div>
+                </div>
                 <a className="resume-open-link" href={RESUME_FILE} target="_blank" rel="noreferrer">
                   <FileText size={17} />
                   Open Resume PDF

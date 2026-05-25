@@ -599,7 +599,7 @@ function App() {
         </button>
         <div className="topbar-actions">
           <button className="gravity-launch" type="button" onClick={() => setAntigravityOpen(true)}>
-            PORTFOLIO
+            ANTIGRAVITY
           </button>
           <div className="topbar-meta">
             <span>{String(pager.currentIndex + 1).padStart(2, '0')}</span>
@@ -784,6 +784,10 @@ function CoverSlide({
         <p className="cover-intro">
           面向工业设计、UX 原型和 AI 视觉工作流岗位的项目证据集。每个项目都用问题、过程、输出和工具链说明设计判断。
         </p>
+        <div className="gravity-guide-tip">
+          <span className="guide-pulse-dot" />
+          <span>点击右上角 <strong className="glow-text">ANTIGRAVITY</strong> 按钮，开启全网页物理反重力浮动交互探索</span>
+        </div>
         <div className="track-filter" aria-label="Portfolio filters">
           {(Object.keys(trackLabels) as TrackFilter[]).map(track => (
             <button

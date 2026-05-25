@@ -3644,3 +3644,262 @@ a:active {
     min-height: 260px;
   }
 }
+
+/* ==========================================================================
+   Premium High-Fidelity CSS Resume Preview and Mockup Styles
+   ========================================================================== */
+
+/* Tiny floating card preview visual */
+.pdf-preview-visual {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #ffffff, #f1f4f3);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  font-family: inherit;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pdf-mock-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.pdf-mock-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ag-teal, #19b895);
+  opacity: 0.76;
+  flex-shrink: 0;
+}
+
+.pdf-mock-header-text {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.pdf-mock-line {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(16, 21, 24, 0.08);
+}
+
+.pdf-mock-line.title {
+  width: 70%;
+  background: rgba(16, 21, 24, 0.16);
+  height: 8px;
+}
+
+.pdf-mock-line.subtitle {
+  width: 45%;
+}
+
+.pdf-mock-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.52rem;
+  flex-grow: 1;
+}
+
+.pdf-mock-section {
+  width: 30%;
+  height: 7px;
+  background: var(--ag-gold, #c9a334);
+  opacity: 0.68;
+  border-radius: 3.5px;
+  margin-top: 0.28rem;
+  margin-bottom: 0.15rem;
+}
+
+.pdf-mock-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.35rem;
+  border: 1px solid rgba(25, 184, 149, 0.24);
+  border-radius: 6px;
+  background: rgba(25, 184, 149, 0.06);
+  padding: 0.3rem 0.55rem;
+  color: var(--ag-teal, #19b895);
+  font-family: "Rajdhani", "Arial Narrow", system-ui, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  margin-top: 0.5rem;
+}
+
+/* Premium full-size A4 visual mockup inside ContactSection */
+.premium-resume-mockup {
+  width: 100%;
+  min-height: 380px;
+  background: #ffffff;
+  border: 1px solid rgba(16, 21, 24, 0.075);
+  border-top: 5px solid var(--ag-teal, #19b895);
+  border-radius: 16px;
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.045);
+  padding: 1.7rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  text-align: left;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  cursor: pointer;
+}
+
+.premium-resume-mockup:hover {
+  transform: translateY(-3px) scale(1.008);
+  box-shadow: 0 22px 64px rgba(0, 0, 0, 0.09);
+  border-color: rgba(25, 184, 149, 0.25);
+}
+
+.resume-mock-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px dashed rgba(16, 21, 24, 0.06);
+  padding-bottom: 0.95rem;
+  margin-bottom: 1.15rem;
+}
+
+.resume-mock-meta h3 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: var(--ag-ink, #101518);
+  letter-spacing: 0.02em;
+}
+
+.resume-mock-tagline {
+  margin: 0.35rem 0 0;
+  color: var(--ag-teal, #19b895);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.resume-mock-avatar-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--ag-teal, #19b895), #068069);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 900;
+  box-shadow: 0 6px 16px rgba(25, 184, 149, 0.32);
+}
+
+.resume-mock-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 1.5rem;
+  flex-grow: 1;
+  margin-bottom: 1.15rem;
+}
+
+.resume-mock-col h4 {
+  margin: 0 0 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #8b9496;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-left: 2px solid var(--ag-gold, #c9a334);
+  padding-left: 0.44rem;
+  line-height: 1.15;
+}
+
+.resume-mock-col section {
+  margin-bottom: 1.1rem;
+}
+
+.resume-mock-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.resume-mock-item strong {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--ag-ink, #101518);
+}
+
+.resume-mock-item span {
+  font-size: 0.8rem;
+  color: #657074;
+}
+
+.resume-skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.44rem;
+}
+
+.resume-skill-list span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ag-ink, #101518);
+  background: #f1f4f3;
+  border-radius: 6px;
+  padding: 0.22rem 0.44rem;
+  border: 1px solid rgba(16, 21, 24, 0.04);
+}
+
+.resume-mock-project {
+  margin-bottom: 0.65rem;
+}
+
+.resume-mock-project strong {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--ag-ink, #101518);
+  display: block;
+}
+
+.resume-mock-project p {
+  margin: 0.18rem 0 0;
+  font-size: 0.76rem;
+  color: #657074;
+  line-height: 1.45;
+}
+
+.resume-mock-footer {
+  border-top: 1px dashed rgba(16, 21, 24, 0.06);
+  padding-top: 0.85rem;
+  text-align: center;
+}
+
+.resume-mock-footer span {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ag-teal, #19b895);
+  letter-spacing: 0.02em;
+  background: rgba(25, 184, 149, 0.06);
+  padding: 0.38rem 0.85rem;
+  border-radius: 99px;
+  border: 1px solid rgba(25, 184, 149, 0.16);
+  display: inline-block;
+}
+
+/* Responsiveness for resume grid */
+@media (max-width: 768px) {
+  .resume-mock-grid {
+    grid-template-columns: 1fr;
+    gap: 0.95rem;
+  }
+}
+
