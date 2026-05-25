@@ -3227,3 +3227,420 @@ a:active {
     transition-duration: 1ms !important;
   }
 }
+
+.antigravity-playground {
+  display: block;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  background:
+    linear-gradient(90deg, rgba(16, 21, 24, 0.028) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(16, 21, 24, 0.022) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(248, 250, 249, 0.98), rgba(238, 243, 241, 0.96));
+  background-size: 42px 42px, 42px 42px, auto;
+}
+
+.antigravity-playground.has-project-open {
+  overflow: hidden;
+}
+
+.antigravity-playground .antigravity-grid {
+  position: fixed;
+  opacity: 0.42;
+}
+
+.antigravity-scroll {
+  position: relative;
+  z-index: 2;
+}
+
+.antigravity-section {
+  position: relative;
+  min-height: 100vh;
+  padding: clamp(92px, 11vh, 132px) clamp(28px, 5vw, 78px) clamp(86px, 10vh, 118px);
+}
+
+.antigravity-section + .antigravity-section {
+  border-top: 1px solid rgba(17, 23, 26, 0.07);
+}
+
+.antigravity-section-inner {
+  width: min(1240px, 100%);
+  margin: 0 auto;
+}
+
+.antigravity-hero {
+  display: grid;
+  min-height: calc(100vh - clamp(178px, 21vh, 250px));
+  place-items: center;
+  align-content: center;
+  gap: clamp(16px, 2.2vw, 24px);
+}
+
+.antigravity-section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: clamp(26px, 4vw, 46px);
+}
+
+.antigravity-section-heading p {
+  margin: 0 0 0.3rem;
+  color: var(--ag-muted);
+  font-family: "Share Tech Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+}
+
+.antigravity-section-heading h2 {
+  margin: 0;
+  color: var(--ag-ink);
+  font-family: "Rajdhani", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  font-weight: 900;
+  line-height: 0.88;
+}
+
+.antigravity-playground .antigravity-logo {
+  min-width: min(760px, calc(100vw - 56px));
+}
+
+.antigravity-playground .antigravity-search {
+  width: min(760px, calc(100vw - 56px));
+}
+
+.antigravity-playground .antigravity-suggestions {
+  justify-content: center;
+  width: min(920px, 100%);
+}
+
+.antigravity-playground .antigravity-skill-tags {
+  display: grid;
+  width: min(920px, 100%);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.antigravity-playground .antigravity-skill-tags button {
+  display: grid;
+  gap: 0.22rem;
+  min-height: 76px;
+  border: 1px solid rgba(17, 23, 26, 0.1);
+  border-left: 0.28rem solid var(--ag-teal);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 0.72rem 0.84rem;
+  color: var(--ag-ink);
+  text-align: left;
+  box-shadow: 0 16px 44px rgba(37, 49, 52, 0.09);
+}
+
+.antigravity-playground .antigravity-skill-tags button strong,
+.antigravity-playground .antigravity-skill-tags button small {
+  display: block;
+}
+
+.antigravity-playground .antigravity-skill-tags button strong {
+  font-family: "Rajdhani", "Noto Sans SC", system-ui, sans-serif;
+  font-size: 0.94rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.antigravity-playground .antigravity-skill-tags button small {
+  color: var(--ag-muted);
+  font-size: 0.74rem;
+  line-height: 1.32;
+}
+
+.antigravity-playground .antigravity-actions {
+  justify-content: center;
+  width: min(920px, 100%);
+}
+
+.antigravity-projects-page .antigravity-card-cloud,
+.antigravity-playground.is-gravity-on .antigravity-card-cloud {
+  position: static;
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 1.8vw, 22px);
+  margin: 0;
+  pointer-events: auto;
+}
+
+.antigravity-playground .antigravity-result-card {
+  position: relative;
+  display: grid;
+  width: auto;
+  min-height: 360px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.78rem;
+  overflow: hidden;
+  border: 1px solid #d8e2e0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.9rem;
+  color: var(--ag-ink);
+  text-align: left;
+  box-shadow: 0 20px 60px rgba(37, 49, 52, 0.1);
+}
+
+.antigravity-playground .antigravity-result-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 0.3rem solid var(--accent, var(--ag-teal));
+  pointer-events: none;
+}
+
+.antigravity-playground .result-index {
+  position: relative;
+  z-index: 2;
+  color: var(--accent, var(--ag-teal));
+  font-family: "Rajdhani", "Arial Narrow", system-ui, sans-serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 0.9;
+}
+
+.antigravity-playground .antigravity-result-card img,
+.antigravity-playground .pdf-preview {
+  width: 100%;
+  height: 220px;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid #e4ecea;
+  border-radius: 14px;
+  background: #f7f9f8;
+  object-fit: cover;
+}
+
+.antigravity-playground .pdf-preview iframe {
+  width: 100%;
+  height: 330px;
+  border: 0;
+  pointer-events: none;
+  background: #fff;
+}
+
+.antigravity-playground .result-copy {
+  position: static;
+  display: grid;
+  gap: 0.28rem;
+  color: var(--ag-ink);
+  text-shadow: none;
+}
+
+.antigravity-playground .result-copy strong {
+  font-family: "Rajdhani", "Noto Sans SC", system-ui, sans-serif;
+  font-size: clamp(1.12rem, 1.5vw, 1.45rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.antigravity-playground .result-copy small {
+  color: var(--ag-muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.antigravity-playground .resume-pdf-card {
+  --accent: var(--ag-ink);
+}
+
+.antigravity-playground.is-gravity-on,
+.antigravity-playground.is-zero-g {
+  touch-action: pan-y;
+}
+
+.antigravity-playground.is-gravity-on [data-antigravity-body] {
+  transform: none !important;
+}
+
+.antigravity-playground.is-gravity-on .antigravity-home {
+  display: block;
+  justify-content: normal;
+  gap: 0;
+}
+
+.antigravity-playground.is-gravity-on .antigravity-logo,
+.antigravity-playground.is-gravity-on .antigravity-search,
+.antigravity-playground.is-gravity-on .antigravity-actions,
+.antigravity-playground.is-gravity-on .antigravity-suggestions,
+.antigravity-playground.is-gravity-on .antigravity-result-card,
+.antigravity-playground.is-gravity-on .antigravity-skill-tags {
+  transform: none !important;
+}
+
+.antigravity-playground.is-physics-live [data-antigravity-body] {
+  touch-action: none;
+}
+
+.antigravity-playground .contact-page-long {
+  width: 100%;
+  min-height: 0;
+  padding-top: 0;
+}
+
+.antigravity-playground .contact-profile h3 {
+  margin: 0.8rem 0 0;
+  color: var(--ag-ink);
+  font-family: "Rajdhani", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  font-size: clamp(3rem, 6vw, 5.6rem);
+  font-weight: 900;
+  line-height: 0.86;
+}
+
+.antigravity-playground .contact-resume-card iframe {
+  width: 100%;
+  min-height: 320px;
+  border: 1px solid rgba(17, 23, 26, 0.1);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.antigravity-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1260;
+  overflow: auto;
+  padding: clamp(78px, 9vh, 106px) clamp(28px, 5vw, 78px) clamp(34px, 5vh, 56px);
+  background:
+    linear-gradient(90deg, rgba(16, 21, 24, 0.026) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(16, 21, 24, 0.022) 1px, transparent 1px),
+    rgba(244, 247, 246, 0.98);
+  background-size: 42px 42px, 42px 42px, auto;
+  backdrop-filter: blur(16px);
+}
+
+.antigravity-detail-overlay .detail-back {
+  position: fixed;
+  top: 26px;
+  left: clamp(24px, 4vw, 58px);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.48rem;
+  border: 1px solid #d6e0df;
+  border-left: 0.28rem solid var(--accent, var(--teal));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.62rem 0.9rem 0.58rem;
+  color: var(--ink);
+  font-family: "Rajdhani", "Noto Sans SC", system-ui, sans-serif;
+  font-weight: 900;
+  box-shadow: 0 14px 40px rgba(37, 49, 52, 0.1);
+}
+
+.antigravity-project-detail {
+  display: grid;
+  min-height: calc(100vh - 150px);
+  align-items: center;
+}
+
+.antigravity-project-detail .deck-grid {
+  width: min(1380px, 100%);
+  height: auto;
+  min-height: calc(100vh - 166px);
+}
+
+.antigravity-project-detail .project-visual-card {
+  max-height: none;
+}
+
+.antigravity-project-detail .project-summary {
+  color: #3f494c;
+}
+
+.media-overlay {
+  z-index: 1400;
+}
+
+.media-step.next svg {
+  transform: none;
+}
+
+@media (max-width: 1100px) {
+  .antigravity-projects-page .antigravity-card-cloud,
+  .antigravity-playground.is-gravity-on .antigravity-card-cloud {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .antigravity-playground .antigravity-result-card {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 980px) {
+  .antigravity-section {
+    padding: 86px 18px 94px;
+  }
+
+  .antigravity-playground .antigravity-skill-tags {
+    max-height: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .antigravity-playground .antigravity-skill-tags button {
+    min-height: 66px;
+    border-radius: 14px;
+  }
+
+  .antigravity-projects-page .antigravity-card-cloud,
+  .antigravity-playground.is-gravity-on .antigravity-card-cloud {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .antigravity-playground .antigravity-result-card {
+    min-height: 250px;
+    border-radius: 16px;
+    padding: 0.68rem;
+  }
+
+  .antigravity-playground .antigravity-result-card img,
+  .antigravity-playground .pdf-preview {
+    height: 148px;
+    border-radius: 12px;
+  }
+
+  .antigravity-playground .pdf-preview iframe {
+    height: 230px;
+  }
+
+  .antigravity-playground .result-index {
+    font-size: 1.55rem;
+  }
+
+  .antigravity-detail-overlay {
+    padding: 76px 18px 28px;
+  }
+
+  .antigravity-project-detail {
+    min-height: auto;
+  }
+
+  .antigravity-project-detail .deck-grid {
+    min-height: auto;
+  }
+
+  .antigravity-project-detail .project-visual-card {
+    max-height: none;
+  }
+
+  .antigravity-playground .contact-page-long {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .antigravity-playground .antigravity-skill-tags,
+  .antigravity-projects-page .antigravity-card-cloud,
+  .antigravity-playground.is-gravity-on .antigravity-card-cloud {
+    grid-template-columns: 1fr;
+  }
+
+  .antigravity-playground .antigravity-result-card {
+    min-height: 260px;
+  }
+}
