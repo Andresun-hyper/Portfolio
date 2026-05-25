@@ -2505,6 +2505,10 @@ a:active {
     --content-max: 1320px;
   }
 
+  .deck-year {
+    display: none !important; /* 中等屏幕下隐藏绝对定位装饰字，为核心方向筛选按钮腾出完美的安全视觉空间 */
+  }
+
   .cover-copy h1 {
     font-size: 4.7rem;
   }
@@ -4296,6 +4300,13 @@ a:active {
   .resume-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+/* 防线二：当垂直视口高度偏矮时，绝对隐藏绝对定位的装饰性年份小字，杜绝任何物理重叠遮挡 */
+@media (max-height: 800px) {
+  .deck-year {
+    display: none !important;
   }
 }
 
