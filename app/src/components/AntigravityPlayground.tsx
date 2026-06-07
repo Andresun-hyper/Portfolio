@@ -25,6 +25,7 @@ const SEARCH_SUGGESTIONS = [
   'Wrist Rehabilitation',
   'AQUARA Robot',
   'DROPLET Bottle',
+  'Outdoor Cookware',
   'Industrial Design',
   'UX Prototype',
   'AI Workflow',
@@ -40,7 +41,7 @@ const skillTags = [
 ];
 
 type Accent = 'teal' | 'gold' | 'black';
-type ProjectId = 'wrist' | 'aquara' | 'droplet';
+type ProjectId = 'wrist' | 'aquara' | 'droplet' | 'cookware';
 type OpenTarget = 'home' | 'projects' | 'contact' | 'resume' | 'github' | 'search' | ProjectId;
 type ProjectTabKey = 'overview' | 'process' | 'output' | 'ai';
 type SectionId = 'home' | 'projects' | 'contact';
@@ -293,6 +294,77 @@ const projects: Project[] = [
       },
     ],
   },
+  {
+    id: 'cookware',
+    title: 'OUTDOOR COOKWARE',
+    subtitle: 'Family outdoor cooking system',
+    range: 'P.18-22',
+    accent: 'gold',
+    cover: './cookware-hero.webp',
+    summary: 'An undergraduate graduation design for family outdoor cooking, focused on safer cooking, easier carrying, integrated storage, and complete product presentation.',
+    role: 'Graduation design / industrial design / product modeling and rendering',
+    problem: 'Family picnic users face open-flame safety risks, cumbersome separated cookware sets, and easily lost accessories in outdoor cooking scenarios.',
+    output: 'A full product concept covering the cooker body, nested pot, accessory tray, engineering drawing, presentation board, and thesis-based problem framing.',
+    tools: 'Rhino / KeyShot / Photoshop / Product Board / Thesis Writing',
+    aiRole: 'AI supported rendering clarity and outdoor scene mood, while the product structure, thesis argument, and board organization came from the graduation design process.',
+    tags: ['GRADUATION DESIGN', 'OUTDOOR COOKWARE', 'PRODUCT RENDER', 'ENGINEERING DRAWING'],
+    gallery: [
+      {
+        src: './cookware-context.webp',
+        label: 'CONTEXT RENDER',
+        caption: 'Outdoor context render showing how the product sits in a family camping and tabletop cooking scene.',
+        evidenceType: 'Scenario render',
+      },
+      {
+        src: './cookware-studio.webp',
+        label: 'STUDIO RENDER',
+        caption: 'Studio render explaining the body, nested pot, side accessory tray, and black-white CMF direction.',
+        evidenceType: 'Product render',
+      },
+      {
+        src: './cookware-board-sketch.webp',
+        label: 'SKETCH BOARD',
+        caption: 'Presentation board crop preserving sketch exploration, form logic, and cookware structure reasoning.',
+        evidenceType: 'Process evidence',
+      },
+      {
+        src: './cookware-engineering.webp',
+        label: 'ENGINEERING',
+        caption: 'Engineering drawing evidence for dimensions, views, and manufacturing-oriented structure expression.',
+        evidenceType: 'Drawing evidence',
+      },
+    ],
+    tabs: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        title: 'A safer family outdoor cookware concept',
+        body: 'The project turns family outdoor cooking problems into a compact product system that combines safety, storage, carrying, and cooking behavior.',
+        bullets: ['Users: family camping and picnic groups', 'Value: lower safety and storage friction', 'Deliverables: renderings, board crops, drawings, and thesis framing'],
+      },
+      {
+        id: 'process',
+        label: 'Process',
+        title: 'From thesis problem to product system',
+        body: 'The thesis frames open-flame risk, scattered cookware, and accessory loss as design problems, then the product responds with integrated housing, nested pot storage, and an accessory tray.',
+        bullets: ['Competitor and user problem framing', 'Sketch and form exploration', 'Board evidence for details and scenarios'],
+      },
+      {
+        id: 'output',
+        label: 'Output',
+        title: 'Renderings, board evidence, and drawings',
+        body: 'New renders carry the visual presentation, while board crops and engineering drawings keep the project grounded in process and structure.',
+        bullets: ['Hero and context renders', 'Board process crop', 'Engineering drawing'],
+      },
+      {
+        id: 'ai',
+        label: 'AI Workflow',
+        title: 'AI strengthens presentation only',
+        body: 'AI was used for render enhancement and outdoor mood support, with final judgment anchored in modeling, thesis content, and board evidence.',
+        bullets: ['Rendering quality support', 'Outdoor atmosphere iteration', 'Structure and thesis evidence retained'],
+      },
+    ],
+  },
 ];
 
 interface MatterWorld {
@@ -455,6 +527,7 @@ function getSuggestionTarget(suggestion: string): OpenTarget {
   if (suggestion.includes('Wrist')) return 'wrist';
   if (suggestion.includes('AQUARA')) return 'aquara';
   if (suggestion.includes('DROPLET')) return 'droplet';
+  if (suggestion.includes('Outdoor') || suggestion.includes('Cookware')) return 'cookware';
   if (suggestion.includes('Industrial') || suggestion.includes('UX') || suggestion.includes('AI')) return 'contact';
   return 'projects';
 }
@@ -510,6 +583,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     wrist: 'overview',
     aquara: 'overview',
     droplet: 'overview',
+    cookware: 'overview',
   });
   const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
   const [resumeOpen, setResumeOpen] = useState(false);

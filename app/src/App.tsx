@@ -70,7 +70,7 @@ interface ActiveMedia {
 const trackLabels: Record<TrackFilter, { label: string; caption: string }> = {
   all: {
     label: 'All Works',
-    caption: '完整浏览三个项目',
+    caption: '完整浏览四个项目',
   },
   industrial: {
     label: 'Industrial',
@@ -322,6 +322,80 @@ const slides: PortfolioSlide[] = [
     ],
   },
   {
+    id: 'cookware',
+    kind: 'project',
+    title: 'OUTDOOR COOKWARE',
+    subtitle: '家庭户外炊具设计',
+    range: 'P.18-22',
+    accent: 'gold',
+    cover: './cookware-hero.webp',
+    summary: '面向家庭户外烹饪场景的炊具产品，围绕安全、便携、收纳和多功能烹饪建立完整的产品方案。',
+    role: '本科毕业设计 / 工业设计 / 产品建模与渲染 / 展板表达',
+    problem: '家庭用户在户外野炊时会遇到传统明火炉具安全隐患、分体式套锅携带收纳繁琐、组件易丢失等问题。',
+    evidence: ['新渲染图呈现产品主体、套锅和户外使用情境', '展板裁剪保留草图推导、细节展示和场景说明', '工程图说明尺寸、结构关系和可制造性表达'],
+    output: '一套家庭户外炊具概念，覆盖产品外观、套锅收纳、香料/配件模块、工程尺寸、展板和论文说明。',
+    tools: 'Rhino / KeyShot / Photoshop / Product Board / Thesis Writing',
+    aiRole: 'AI 用于辅助提升渲染表达和户外场景氛围，产品结构、论文论证和展板组织来自毕业设计过程。',
+    tags: ['GRADUATION DESIGN', 'OUTDOOR COOKWARE', 'PRODUCT RENDER', 'ENGINEERING DRAWING'],
+    jobTracks: ['industrial', 'ai'],
+    gallery: [
+      {
+        src: './cookware-context.webp',
+        label: 'CONTEXT RENDER',
+        caption: '户外场景渲染用于说明家庭露营、桌面烹饪和产品使用环境之间的关系。',
+        evidenceType: 'Scenario render',
+      },
+      {
+        src: './cookware-studio.webp',
+        label: 'STUDIO RENDER',
+        caption: '工作室角度展示主体、内胆套锅、侧向配件托盘和整体黑白 CMF。',
+        evidenceType: 'Product render',
+      },
+      {
+        src: './cookware-board-sketch.webp',
+        label: 'SKETCH BOARD',
+        caption: '从展板中裁出的草图过程，保留造型推导、套锅结构和外壳比例探索。',
+        evidenceType: 'Process evidence',
+      },
+      {
+        src: './cookware-engineering.webp',
+        label: 'ENGINEERING',
+        caption: '工程图呈现产品主视、侧视、俯视和关键尺寸，补足渲染之外的结构证据。',
+        evidenceType: 'Drawing evidence',
+      },
+    ],
+    tabs: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        title: '面向家庭户外烹饪的安全便携炊具',
+        body: '项目从家庭户外野炊场景切入，把安全性、便携收纳和多功能烹饪整合进一个炊具系统。',
+        bullets: ['目标用户：家庭露营和户外野餐用户', '核心价值：降低明火风险与组件管理负担', '产出：产品方案、工程图、展板和论文说明'],
+      },
+      {
+        id: 'process',
+        label: 'Process',
+        title: '从论文问题到产品结构',
+        body: '论文和设计过程共同指向传统明火炉具风险、套锅携带繁琐和组件丢失等问题，再转化为套锅收纳、配件托盘和一体化外壳。',
+        bullets: ['竞品和用户问题梳理', '草图形态与功能模块推导', '展板中保留尺寸、细节和场景证据'],
+      },
+      {
+        id: 'output',
+        label: 'Output',
+        title: '渲染、展板和工程图共同说明方案',
+        body: '新渲染作为主视觉，展板裁剪提供过程证据，工程图补充尺寸和结构表达，避免只依赖单张效果图。',
+        bullets: ['主产品渲染', '展板过程裁剪', '工程尺寸图'],
+      },
+      {
+        id: 'ai',
+        label: 'AI Workflow',
+        title: 'AI 用于强化场景表达',
+        body: 'AI 主要参与渲染清晰度和户外氛围优化，最终页面仍以建模、展板和论文内容为判断依据。',
+        bullets: ['提升产品渲染质量', '辅助户外场景氛围', '保留结构与论文证据'],
+      },
+    ],
+  },
+  {
     id: 'contact',
     kind: 'contact',
     title: 'CONTACT',
@@ -545,6 +619,7 @@ function App() {
     wrist: 'overview',
     aquara: 'overview',
     droplet: 'overview',
+    cookware: 'overview',
   });
   const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
   const [antigravityOpen, setAntigravityOpen] = useState(false);
@@ -806,9 +881,9 @@ function CoverSlide({
       <div className="cover-index" aria-label="Project preview index">
         <div className="cover-index-header">
           <span>SELECTED WORKS</span>
-          <strong>{visibleProjects.length}/3</strong>
+          <strong>{visibleProjects.length}/{projectSlides.length}</strong>
         </div>
-        <div className="cover-preview-stack">
+        <div className={`cover-preview-stack ${projectSlides.length > 3 ? 'is-dense' : ''}`}>
           {projectSlides.map((project, index) => {
             const highlighted = activeTrack === 'all' || project.jobTracks?.includes(activeTrack);
             return (

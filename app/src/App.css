@@ -576,6 +576,11 @@ button {
   padding: 1rem;
 }
 
+.cover-preview-stack.is-dense {
+  gap: 0.62rem;
+  padding: 0.78rem;
+}
+
 .cover-project-strip {
   position: relative;
   display: grid;
@@ -624,6 +629,25 @@ button {
   border: 1px solid #e3e9e8;
   border-radius: 12px;
   background: #f3f6f5;
+}
+
+.cover-preview-stack.is-dense .cover-project-strip {
+  min-height: 114px;
+  grid-template-columns: 3.5rem minmax(138px, 0.86fr) minmax(210px, 1.14fr);
+  gap: 0.74rem;
+  padding: 0.68rem;
+}
+
+.cover-preview-stack.is-dense .strip-number {
+  font-size: 2.28rem;
+}
+
+.cover-preview-stack.is-dense .cover-project-strip img {
+  height: 88px;
+}
+
+.cover-preview-stack.is-dense .strip-copy strong {
+  font-size: 1.22rem;
 }
 
 .strip-copy strong,
@@ -2653,12 +2677,7 @@ a:active {
   }
 
   .track-filter {
-    display: flex;
-    gap: 0.52rem;
-    overflow-x: auto;
-    margin-top: 1rem;
-    padding-bottom: 0.1rem;
-    scrollbar-width: thin;
+    display: none;
   }
 
   .track-filter button {
@@ -2715,6 +2734,34 @@ a:active {
 
   .strip-copy em {
     display: none;
+  }
+
+  .cover-preview-stack.is-dense {
+    gap: 0.24rem;
+    padding: 0.32rem;
+  }
+
+  .cover-preview-stack.is-dense .cover-project-strip {
+    min-height: 38px;
+    grid-template-columns: 1.8rem 58px 1fr;
+    gap: 0.34rem;
+    padding: 0.24rem;
+  }
+
+  .cover-preview-stack.is-dense .strip-number {
+    font-size: 1.24rem;
+  }
+
+  .cover-preview-stack.is-dense .cover-project-strip img {
+    height: 30px;
+  }
+
+  .cover-preview-stack.is-dense .strip-copy strong {
+    font-size: 0.72rem;
+  }
+
+  .cover-preview-stack.is-dense .strip-copy small {
+    font-size: 0.56rem;
   }
 
   .slide-heading {
@@ -4333,4 +4380,3 @@ a:active {
     display: none !important;
   }
 }
-
