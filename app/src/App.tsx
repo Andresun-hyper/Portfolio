@@ -7,7 +7,9 @@ import {
   ArrowUp,
   ChevronLeft,
   ChevronRight,
+  Github,
   Mail,
+  MessageCircle,
   Phone,
   Play,
   X,
@@ -15,6 +17,9 @@ import {
 } from 'lucide-react';
 import AntigravityPlayground from './components/AntigravityPlayground';
 import './App.css';
+
+const GITHUB_URL = 'https://github.com/Andresun-hyper';
+const WECHAT_ID = 's18715111179';
 
 type SlideKind = 'cover' | 'contents' | 'project' | 'contact';
 type Direction = 'next' | 'prev';
@@ -1146,6 +1151,14 @@ function ContactSlide() {
             <Mail size={19} />
             <span>s18715111179@gmail.com</span>
           </a>
+          <a href={GITHUB_URL} target="_blank" rel="noreferrer" data-no-page-swipe="true">
+            <Github size={19} />
+            <span>github.com/Andresun-hyper</span>
+          </a>
+          <div className="contact-method-item" data-no-page-swipe="true">
+            <MessageCircle size={19} />
+            <span>微信号 {WECHAT_ID}</span>
+          </div>
         </div>
 
         <div className="contact-grid">

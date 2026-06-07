@@ -1354,7 +1354,8 @@ button {
   align-content: start;
 }
 
-.contact-methods a {
+.contact-methods a,
+.contact-method-item {
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -2289,7 +2290,8 @@ button {
 }
 
 .contact-resume-card a,
-.contact-link-grid a {
+.contact-link-grid a,
+.contact-link-grid div {
   color: var(--ag-ink);
   text-decoration: none;
   font-family: "Rajdhani", "Noto Sans SC", system-ui, sans-serif;
@@ -2313,7 +2315,8 @@ button {
   align-content: center;
 }
 
-.contact-link-grid a {
+.contact-link-grid a,
+.contact-link-grid div {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;

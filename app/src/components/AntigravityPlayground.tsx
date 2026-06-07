@@ -7,6 +7,7 @@ import {
   FileText,
   Github,
   Mail,
+  MessageCircle,
   MousePointer2,
   Phone,
   Play,
@@ -19,6 +20,7 @@ import {
 const MATTER_CDN = 'https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js';
 const RESUME_FILE = './孙启圣_字节跳动_简历 1.pdf';
 const GITHUB_URL = 'https://github.com/Andresun-hyper';
+const WECHAT_ID = 's18715111179';
 
 const SEARCH_SUGGESTIONS = [
   '孙启圣 PDF Resume',
@@ -1281,6 +1283,10 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                   <span>github.com/Andresun-hyper</span>
                   <ExternalLink size={15} />
                 </a>
+                <div data-antigravity-body data-open-target="contact">
+                  <MessageCircle size={18} />
+                  <span>微信号 {WECHAT_ID}</span>
+                </div>
               </div>
             </section>
           </div>
