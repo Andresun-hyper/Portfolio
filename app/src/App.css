@@ -2328,6 +2328,14 @@ button {
   word-break: break-word;
 }
 
+.contact-link-grid div {
+  border: 1px solid rgba(17, 23, 26, 0.08);
+  border-left: 0.32rem solid color-mix(in srgb, var(--ag-teal) 64%, transparent);
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: 0 14px 42px rgba(37, 49, 52, 0.07);
+  backdrop-filter: blur(12px);
+}
+
 .antigravity-playground.is-physics-live [data-antigravity-body] {
   transform-origin: 50% 50%;
   transition: box-shadow 140ms ease, filter 140ms ease;
@@ -3003,7 +3011,8 @@ a:active {
     gap: 0.58rem;
   }
 
-  .contact-methods a {
+  .contact-methods a,
+  .contact-method-item {
     padding: 0.62rem 0.75rem;
     font-size: 0.92rem;
   }
@@ -3293,7 +3302,8 @@ a:active {
     font-size: 0.64rem;
   }
 
-  .contact-link-grid a {
+  .contact-link-grid a,
+  .contact-link-grid div {
     min-height: 50px;
     border-radius: 18px;
     font-size: 0.74rem;
