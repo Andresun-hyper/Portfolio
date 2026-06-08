@@ -42,9 +42,12 @@ const projects: Project[] = [
     floor: 'ROOF_15',
     accent: '#FDB933',
     gallery: [
-      { src: './pet-bottle-flow.webp', label: 'FLOW RENDER' },
-      { src: './pet-bottle-render.webp', label: 'PRODUCT RENDER' },
-      { src: './pet-bottle-sketch.webp', label: 'SKETCH BOARD' },
+      { src: './droplet-gallery-1.webp', label: 'A4 BOARD 1' },
+      { src: './droplet-gallery-2.webp', label: 'A4 BOARD 2' },
+      { src: './droplet-gallery-3.webp', label: 'A4 BOARD 3' },
+      { src: './droplet-gallery-4.webp', label: 'A4 BOARD 4' },
+      { src: './droplet-gallery-5.webp', label: 'A4 BOARD 5' },
+      { src: './droplet-gallery-6.webp', label: 'A4 BOARD 6' },
     ],
   },
   {
