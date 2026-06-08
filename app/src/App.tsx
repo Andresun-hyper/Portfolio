@@ -109,11 +109,85 @@ const slides: PortfolioSlide[] = [
     accent: 'gold',
   },
   {
+    id: 'droplet',
+    kind: 'project',
+    title: 'DROPLET',
+    subtitle: '宠物运动水杯',
+    range: 'P.03-07',
+    accent: 'black',
+    cover: './droplet-source-render-red-dot-2026.png',
+    summary: 'Red Dot Award: Design Concept Winner 2026 项目，面向户外运动场景的宠物补水产品，强调携带、饮水、回流和电解质补给的连续体验。',
+    role: '工业设计 / 场景研究 / 产品渲染与 AIGC 表达',
+    problem: '户外运动后的宠物容易出现饮水不足、补给不便和携带负担，普通水杯难以兼顾卫生、回流和营养补给。',
+    evidence: ['产品主渲染展示使用姿态和造型语言', '草图与流程图说明从问题到结构的推导', '细节图表现饮水、回流和握持关系'],
+    output: '一套获得 Red Dot Award: Design Concept Winner 2026 的宠物运动水杯概念，覆盖使用流程、结构表达、外观渲染和场景化展示。',
+    tools: 'Sketch / Rhino / KeyShot / Midjourney / Photoshop',
+    aiRole: 'AI 用于快速探索产品场景、材质氛围和展示页视觉，再结合草图与结构图收敛方案。',
+    tags: ['RED DOT 2026', 'PET PRODUCT', 'SCENARIO RESEARCH', 'PRODUCT RENDER'],
+    jobTracks: ['industrial', 'ai'],
+    gallery: [
+      {
+        src: './droplet-source-render-red-dot-2026.png',
+        label: 'SOURCE RENDER',
+        caption: '主渲染用于呈现产品姿态、比例、户外运动情境和 Red Dot 2026 获奖标识。',
+        evidenceType: 'Hero render',
+      },
+      {
+        src: './pet-bottle-render.webp',
+        label: 'PRODUCT RENDER',
+        caption: '产品渲染强化结构、材质和手持关系，是工业设计输出的核心证据。',
+        evidenceType: 'Render evidence',
+      },
+      {
+        src: './pet-bottle-sketch.webp',
+        label: 'SKETCH BOARD',
+        caption: '草图板说明造型推导、结构方向和场景假设。',
+        evidenceType: 'Sketch evidence',
+      },
+      {
+        src: './pet-bottle-flow.webp',
+        label: 'FLOW DETAIL',
+        caption: '流程细节说明饮水、回流和携带之间的体验闭环。',
+        evidenceType: 'Usage evidence',
+      },
+    ],
+    tabs: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        title: '户外运动后的宠物补水体验',
+        body: 'DROPLET 把便携补水、营养补给和回流清洁压缩到单一产品动作中。',
+        bullets: ['对象：户外运动宠物和主人', '目标：减少补水和携带负担', '产出：产品概念和场景渲染'],
+      },
+      {
+        id: 'process',
+        label: 'Process',
+        title: '场景先行的产品推导',
+        body: '从户外运动后的脱水风险切入，推导出握持、饮水、回流和补给结构。',
+        bullets: ['场景痛点梳理', '草图形态探索', '使用流程闭环'],
+      },
+      {
+        id: 'output',
+        label: 'Output',
+        title: '从草图到渲染的完整表达',
+        body: '最终页面同时呈现草图、流程、渲染和场景，使产品方案更容易被岗位筛选者判断。',
+        bullets: ['草图板', '产品渲染', '使用流程图'],
+      },
+      {
+        id: 'ai',
+        label: 'AI Workflow',
+        title: 'AI 加速视觉探索',
+        body: 'AI 辅助建立产品展示氛围和视觉叙事，再由产品逻辑筛选可用方向。',
+        bullets: ['场景氛围生成', '材质和光影探索', '与手绘和建模结果交叉验证'],
+      },
+    ],
+  },
+  {
     id: 'wrist',
     kind: 'project',
     title: 'WRIST REHABILITATION',
     subtitle: '腕部康复评估设计',
-    range: 'P.03-07',
+    range: 'P.08-12',
     accent: 'teal',
     cover: './rehab-phone-mockup.png',
     video: './fracture-rehab-demo.mp4',
@@ -189,7 +263,7 @@ const slides: PortfolioSlide[] = [
     kind: 'project',
     title: 'AQUARA',
     subtitle: '鱼缸清洁机器人',
-    range: 'P.08-12',
+    range: 'P.13-17',
     accent: 'gold',
     cover: './aqua-robot-cover.webp',
     summary: '围绕中大型鱼缸清洁痛点，提出自动爬壁清洁、回仓充电和自清洁结合的产品方案。',
@@ -249,80 +323,6 @@ const slides: PortfolioSlide[] = [
         title: 'AI 辅助表达但不替代结构',
         body: 'AI 用于提升渲染表达和场景气质，产品结构和功能路径在设计判断中先行。',
         bullets: ['渲染氛围探索', '构图和材质迭代', '最终页面回到产品证据'],
-      },
-    ],
-  },
-  {
-    id: 'droplet',
-    kind: 'project',
-    title: 'DROPLET',
-    subtitle: '宠物运动水杯',
-    range: 'P.13-17',
-    accent: 'black',
-    cover: './droplet-source-render.png',
-    summary: '面向户外运动场景的宠物补水产品，强调携带、饮水、回流和电解质补给的连续体验。',
-    role: '工业设计 / 场景研究 / 产品渲染与 AIGC 表达',
-    problem: '户外运动后的宠物容易出现饮水不足、补给不便和携带负担，普通水杯难以兼顾卫生、回流和营养补给。',
-    evidence: ['产品主渲染展示使用姿态和造型语言', '草图与流程图说明从问题到结构的推导', '细节图表现饮水、回流和握持关系'],
-    output: '一套宠物运动水杯概念，覆盖使用流程、结构表达、外观渲染和场景化展示。',
-    tools: 'Sketch / Rhino / KeyShot / Midjourney / Photoshop',
-    aiRole: 'AI 用于快速探索产品场景、材质氛围和展示页视觉，再结合草图与结构图收敛方案。',
-    tags: ['PET PRODUCT', 'SCENARIO RESEARCH', 'PRODUCT RENDER', 'CMF'],
-    jobTracks: ['industrial', 'ai'],
-    gallery: [
-      {
-        src: './droplet-source-render.png',
-        label: 'SOURCE RENDER',
-        caption: '主渲染用于呈现产品姿态、比例和户外运动情境。',
-        evidenceType: 'Hero render',
-      },
-      {
-        src: './pet-bottle-render.webp',
-        label: 'PRODUCT RENDER',
-        caption: '产品渲染强化结构、材质和手持关系，是工业设计输出的核心证据。',
-        evidenceType: 'Render evidence',
-      },
-      {
-        src: './pet-bottle-sketch.webp',
-        label: 'SKETCH BOARD',
-        caption: '草图板说明造型推导、结构方向和场景假设。',
-        evidenceType: 'Sketch evidence',
-      },
-      {
-        src: './pet-bottle-flow.webp',
-        label: 'FLOW DETAIL',
-        caption: '流程细节说明饮水、回流和携带之间的体验闭环。',
-        evidenceType: 'Usage evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: '户外运动后的宠物补水体验',
-        body: 'DROPLET 把便携补水、营养补给和回流清洁压缩到单一产品动作中。',
-        bullets: ['对象：户外运动宠物和主人', '目标：减少补水和携带负担', '产出：产品概念和场景渲染'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: '场景先行的产品推导',
-        body: '从户外运动后的脱水风险切入，推导出握持、饮水、回流和补给结构。',
-        bullets: ['场景痛点梳理', '草图形态探索', '使用流程闭环'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: '从草图到渲染的完整表达',
-        body: '最终页面同时呈现草图、流程、渲染和场景，使产品方案更容易被岗位筛选者判断。',
-        bullets: ['草图板', '产品渲染', '使用流程图'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI 加速视觉探索',
-        body: 'AI 辅助建立产品展示氛围和视觉叙事，再由产品逻辑筛选可用方向。',
-        bullets: ['场景氛围生成', '材质和光影探索', '与手绘和建模结果交叉验证'],
       },
     ],
   },
@@ -1139,7 +1139,7 @@ function ContactSlide() {
         <div className="contact-name">
           <span>PRODUCT & EXPERIENCE DESIGN</span>
           <h2>孙启圣</h2>
-          <p>产品设计硕士在读 · 上海工程技术大学</p>
+          <p>产品设计硕士在读 · 上海工程技术大学 · DROPLET Red Dot 2026 Winner</p>
         </div>
 
         <div className="contact-methods">
@@ -1165,6 +1165,10 @@ function ContactSlide() {
           <div>
             <span>EDUCATION</span>
             <strong>上海工程技术大学 · 产品设计硕士在读 / 亳州学院 · 产品设计本科毕业</strong>
+          </div>
+          <div>
+            <span>AWARD</span>
+            <strong>DROPLET · Red Dot Award: Design Concept Winner 2026</strong>
           </div>
           <div>
             <span>FOCUS</span>

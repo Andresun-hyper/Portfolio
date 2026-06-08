@@ -18,15 +18,15 @@ import {
 } from 'lucide-react';
 
 const MATTER_CDN = 'https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js';
-const RESUME_FILE = './孙启圣_字节跳动_简历 1.pdf';
+const RESUME_FILE = './孙启圣_工业设计实习生_简历_红点2026.pdf';
 const GITHUB_URL = 'https://github.com/Andresun-hyper';
 const WECHAT_ID = 's18715111179';
 
 const SEARCH_SUGGESTIONS = [
   '孙启圣 PDF Resume',
+  'DROPLET Bottle',
   'Wrist Rehabilitation',
   'AQUARA Robot',
-  'DROPLET Bottle',
   'Outdoor Cookware',
   'Industrial Design',
   'UX Prototype',
@@ -89,10 +89,81 @@ interface ActiveMedia {
 
 const projects: Project[] = [
   {
+    id: 'droplet',
+    title: 'DROPLET',
+    subtitle: 'Outdoor pet hydration product',
+    range: 'P.03-07',
+    accent: 'black',
+    cover: './droplet-source-render-red-dot-2026.png',
+    summary: 'A Red Dot Award: Design Concept Winner 2026 pet hydration product for outdoor exercise, focused on carry, drinking, backflow control, and electrolyte supplement scenarios.',
+    role: 'Industrial design / scenario research / product rendering and AIGC expression',
+    problem: 'Outdoor exercise creates hydration, hygiene, and carry problems for pets and owners that ordinary bottles do not solve cleanly.',
+    output: 'An award-recognized product concept covering usage flow, structural expression, rendering, and scenario presentation.',
+    tools: 'Sketch / Rhino / KeyShot / Midjourney / Photoshop',
+    aiRole: 'AI accelerated scenario mood and material exploration, then sketches and structure diagrams narrowed the final direction.',
+    tags: ['RED DOT 2026', 'PET PRODUCT', 'SCENARIO RESEARCH', 'PRODUCT RENDER', 'CMF'],
+    gallery: [
+      {
+        src: './droplet-source-render-red-dot-2026.png',
+        label: 'SOURCE RENDER',
+        caption: 'Main render showing posture, proportion, and outdoor exercise context.',
+        evidenceType: 'Hero render',
+      },
+      {
+        src: './pet-bottle-render.webp',
+        label: 'PRODUCT RENDER',
+        caption: 'Product rendering focused on structure, material, and hand-held relation.',
+        evidenceType: 'Render evidence',
+      },
+      {
+        src: './pet-bottle-sketch.webp',
+        label: 'SKETCH BOARD',
+        caption: 'Sketch board explaining form exploration, structural direction, and scenario assumptions.',
+        evidenceType: 'Sketch evidence',
+      },
+      {
+        src: './pet-bottle-flow.webp',
+        label: 'FLOW DETAIL',
+        caption: 'Usage detail explaining drinking, backflow, and carry as one experience loop.',
+        evidenceType: 'Usage evidence',
+      },
+    ],
+    tabs: [
+      {
+        id: 'overview',
+        label: 'Overview',
+        title: 'Hydration after outdoor exercise',
+        body: 'DROPLET compresses carry, drinking, supplement, and backflow control into one product action.',
+        bullets: ['Award: Red Dot Award: Design Concept Winner 2026', 'Users: outdoor pets and owners', 'Goal: reduce hydration and carry burden', 'Output: concept and scenario render'],
+      },
+      {
+        id: 'process',
+        label: 'Process',
+        title: 'Scenario-led product reasoning',
+        body: 'The project starts from dehydration risk after outdoor activity, then derives grip, drinking, backflow, and refill structure.',
+        bullets: ['Scenario pain-point mapping', 'Sketch form exploration', 'Closed-loop usage flow'],
+      },
+      {
+        id: 'output',
+        label: 'Output',
+        title: 'From sketch to render',
+        body: 'Sketches, flow diagrams, renders, and scenarios make the product direction easier to evaluate.',
+        bullets: ['Sketch board', 'Product render', 'Usage flow detail'],
+      },
+      {
+        id: 'ai',
+        label: 'AI Workflow',
+        title: 'AI speeds visual exploration',
+        body: 'AI helped build the display atmosphere and narrative, then product logic filtered the usable direction.',
+        bullets: ['Scenario mood generation', 'Material and light exploration', 'Cross-check with sketch and model output'],
+      },
+    ],
+  },
+  {
     id: 'wrist',
     title: 'WRIST REHABILITATION',
     subtitle: 'Home rehab UX prototype',
-    range: 'P.03-07',
+    range: 'P.08-12',
     accent: 'teal',
     cover: './rehab-phone-mockup.png',
     summary: 'A runnable rehabilitation app prototype built around safety confirmation, guided movement feedback, result review, and a replayable local demo flow.',
@@ -164,7 +235,7 @@ const projects: Project[] = [
     id: 'aquara',
     title: 'AQUARA',
     subtitle: 'Aquarium cleaning robot',
-    range: 'P.08-12',
+    range: 'P.13-17',
     accent: 'gold',
     cover: './aqua-robot-cover.webp',
     summary: 'A product concept for mid-to-large aquariums, combining wall-cleaning, dock charging, self-cleaning, form language, and CMF presentation.',
@@ -222,77 +293,6 @@ const projects: Project[] = [
         title: 'AI supports expression, not structure',
         body: 'AI helped explore presentation quality, while function and assembly logic were set by design judgment.',
         bullets: ['Rendering mood exploration', 'Composition iteration', 'Final evidence anchored in product logic'],
-      },
-    ],
-  },
-  {
-    id: 'droplet',
-    title: 'DROPLET',
-    subtitle: 'Outdoor pet hydration product',
-    range: 'P.13-17',
-    accent: 'black',
-    cover: './droplet-source-render.png',
-    summary: 'A pet hydration product for outdoor exercise, focused on carry, drinking, backflow control, and electrolyte supplement scenarios.',
-    role: 'Industrial design / scenario research / product rendering and AIGC expression',
-    problem: 'Outdoor exercise creates hydration, hygiene, and carry problems for pets and owners that ordinary bottles do not solve cleanly.',
-    output: 'A product concept covering usage flow, structural expression, rendering, and scenario presentation.',
-    tools: 'Sketch / Rhino / KeyShot / Midjourney / Photoshop',
-    aiRole: 'AI accelerated scenario mood and material exploration, then sketches and structure diagrams narrowed the final direction.',
-    tags: ['PET PRODUCT', 'SCENARIO RESEARCH', 'PRODUCT RENDER', 'CMF'],
-    gallery: [
-      {
-        src: './droplet-source-render.png',
-        label: 'SOURCE RENDER',
-        caption: 'Main render showing posture, proportion, and outdoor exercise context.',
-        evidenceType: 'Hero render',
-      },
-      {
-        src: './pet-bottle-render.webp',
-        label: 'PRODUCT RENDER',
-        caption: 'Product rendering focused on structure, material, and hand-held relation.',
-        evidenceType: 'Render evidence',
-      },
-      {
-        src: './pet-bottle-sketch.webp',
-        label: 'SKETCH BOARD',
-        caption: 'Sketch board explaining form exploration, structural direction, and scenario assumptions.',
-        evidenceType: 'Sketch evidence',
-      },
-      {
-        src: './pet-bottle-flow.webp',
-        label: 'FLOW DETAIL',
-        caption: 'Usage detail explaining drinking, backflow, and carry as one experience loop.',
-        evidenceType: 'Usage evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: 'Hydration after outdoor exercise',
-        body: 'DROPLET compresses carry, drinking, supplement, and backflow control into one product action.',
-        bullets: ['Users: outdoor pets and owners', 'Goal: reduce hydration and carry burden', 'Output: concept and scenario render'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: 'Scenario-led product reasoning',
-        body: 'The project starts from dehydration risk after outdoor activity, then derives grip, drinking, backflow, and refill structure.',
-        bullets: ['Scenario pain-point mapping', 'Sketch form exploration', 'Closed-loop usage flow'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: 'From sketch to render',
-        body: 'Sketches, flow diagrams, renders, and scenarios make the product direction easier to evaluate.',
-        bullets: ['Sketch board', 'Product render', 'Usage flow detail'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI speeds visual exploration',
-        body: 'AI helped build the display atmosphere and narrative, then product logic filtered the usable direction.',
-        bullets: ['Scenario mood generation', 'Material and light exploration', 'Cross-check with sketch and model output'],
       },
     ],
   },
@@ -862,7 +862,6 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
 
     const onWheel = (event: WheelEvent) => {
       if (
-        gravityEnabledRef.current ||
         activeProjectIdRef.current ||
         activeMediaRef.current ||
         resumeOpenRef.current
@@ -1186,6 +1185,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                   <span className="result-copy">
                     <strong>{project.title}</strong>
                     <small>{project.subtitle}</small>
+                    {project.id === 'droplet' && <em>Red Dot Award: Design Concept Winner 2026</em>}
                   </span>
                 </button>
               ))}
@@ -1210,7 +1210,9 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                 <span>Product & Experience Design</span>
                 <h3>孙启圣</h3>
                 <p>Industrial design graduate student focused on product systems, UX prototypes, AI-assisted visual workflows, and portfolio-ready interaction demos.</p>
+                <p className="contact-award-note">DROPLET received the Red Dot Award: Design Concept Winner 2026.</p>
                 <div className="contact-chip-row">
+                  <strong className="is-award-chip">Red Dot 2026</strong>
                   {skillTags.map(tag => <strong key={tag.title}>{tag.title}</strong>)}
                 </div>
               </article>
@@ -1252,8 +1254,8 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                       <section style={{ marginTop: '0.5rem' }}>
                         <h4>代表作 / Selected</h4>
                         <div className="resume-mock-project-brief">
-                          <span>1. 腕部康复交互系统</span>
-                          <span>2. clean 鱼缸机器人</span>
+                          <span>1. DROPLET · Red Dot 2026 Winner</span>
+                          <span>2. 腕部康复交互系统</span>
                         </div>
                       </section>
                     </div>
@@ -1681,6 +1683,10 @@ function ResumeDetail({ onClose }: { onClose: () => void }) {
                 <h3>荣誉奖励 / Selected Honors</h3>
                 <div className="resume-honors-grid">
                   <div className="honor-tag-item">
+                    <span className="honor-badge is-gold">RED DOT</span>
+                    <strong>DROPLET · Red Dot Award: Design Concept Winner 2026</strong>
+                  </div>
+                  <div className="honor-tag-item">
                     <span className="honor-badge is-gold">国家级</span>
                     <strong>大学生创新创业大赛 · 筹划项目被评为国家级</strong>
                   </div>
@@ -1709,10 +1715,22 @@ function ResumeDetail({ onClose }: { onClose: () => void }) {
 
               <section className="resume-section">
                 <h3>核心作品与项目经历 / Key Portfolios</h3>
-                
+
                 <div className="resume-project-item">
                   <div className="project-header">
-                    <h4>1. 腕部康复评估交互系统 (UX Prototype)</h4>
+                    <h4>1. DROPLET 宠物运动水杯 (Pet Product Design)</h4>
+                    <span className="project-tag">Red Dot 2026 / ID</span>
+                  </div>
+                  <p className="project-desc">
+                    户外运动宠物补水产品，研究户外场景下的宠物脱水与携带痛点，推导手持、喂水、电解质补充与饮水回流的结构与闭环体验。
+                  </p>
+                  <p className="project-award-line">Award: Red Dot Award: Design Concept Winner 2026</p>
+                  <p className="project-tools">工具链: Sketch / Rhino / KeyShot / Midjourney</p>
+                </div>
+
+                <div className="resume-project-item">
+                  <div className="project-header">
+                    <h4>2. 腕部康复评估交互系统 (UX Prototype)</h4>
                     <span className="project-tag">UX / React / Video</span>
                   </div>
                   <p className="project-desc">
@@ -1723,24 +1741,13 @@ function ResumeDetail({ onClose }: { onClose: () => void }) {
 
                 <div className="resume-project-item">
                   <div className="project-header">
-                    <h4>2. AQUARA 鱼缸清洁机器人 (Industrial Design)</h4>
+                    <h4>3. AQUARA 鱼缸清洁机器人 (Industrial Design)</h4>
                     <span className="project-tag">ID / CMF / System</span>
                   </div>
                   <p className="project-desc">
                     针对中大型鱼缸的维护痛点，设计了包含自动爬壁清洁、充电回仓与刷头自清洁一体化的机器人系统。输出六视图与高精场景渲染，论证形体与材质气质。
                   </p>
                   <p className="project-tools">工具链: Rhino / KeyShot / Photoshop / AIGC rendering</p>
-                </div>
-
-                <div className="resume-project-item">
-                  <div className="project-header">
-                    <h4>3. DROPLET 宠物运动水杯 (Pet Product Design)</h4>
-                    <span className="project-tag">ID / Scenario Research</span>
-                  </div>
-                  <p className="project-desc">
-                    户外运动宠物补水产品，研究户外场景下的宠物脱水与携带痛点，推导手持、喂水、电解质补充与饮水回流的结构与闭环体验。
-                  </p>
-                  <p className="project-tools">工具链: Sketch / Rhino / KeyShot / Midjourney</p>
                 </div>
               </section>
             </div>
