@@ -2,6 +2,8 @@ node_modules/
 dist/
 app/node_modules/
 app/dist/
+admin/node_modules/
+admin/dist/
 .DS_Store
 Thumbs.db
 validation-*.png

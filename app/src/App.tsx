@@ -7,6 +7,7 @@ import {
   ArrowUp,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
   Github,
   Mail,
   MessageCircle,
@@ -16,420 +17,18 @@ import {
   ZoomIn,
 } from 'lucide-react';
 import AntigravityPlayground from './components/AntigravityPlayground';
+import { contact, projectSlides, slides, trackLabels } from './content/portfolio';
+import type { Accent, GalleryItem, PortfolioSlide, ProjectTabKey, TrackFilter } from './content/portfolio.schema';
 import './App.css';
 
-const GITHUB_URL = 'https://github.com/Andresun-hyper';
-const WECHAT_ID = 's18715111179';
+const { githubUrl: GITHUB_URL, wechatId: WECHAT_ID } = contact;
 
-type SlideKind = 'cover' | 'contents' | 'project' | 'contact';
 type Direction = 'next' | 'prev';
-type Accent = 'teal' | 'gold' | 'black';
-type JobTrack = 'industrial' | 'ux' | 'ai';
-type TrackFilter = 'all' | JobTrack;
-type ProjectTabKey = 'overview' | 'process' | 'output' | 'ai';
-
-interface GalleryItem {
-  src: string;
-  label: string;
-  type?: 'image' | 'video';
-  caption: string;
-  evidenceType: string;
-  projectId?: string;
-}
-
-interface ProjectTab {
-  id: ProjectTabKey;
-  label: string;
-  title: string;
-  body: string;
-  bullets: string[];
-}
-
-interface PortfolioSlide {
-  id: string;
-  kind: SlideKind;
-  title: string;
-  subtitle: string;
-  range?: string;
-  accent: Accent;
-  cover?: string;
-  summary?: string;
-  tags?: string[];
-  gallery?: GalleryItem[];
-  video?: string;
-  role?: string;
-  problem?: string;
-  evidence?: string[];
-  output?: string;
-  tools?: string;
-  aiRole?: string;
-  jobTracks?: JobTrack[];
-  tabs?: ProjectTab[];
-}
 
 interface ActiveMedia {
   projectId: string;
   index: number;
 }
-
-const trackLabels: Record<TrackFilter, { label: string; caption: string }> = {
-  all: {
-    label: 'All Works',
-    caption: '完整浏览四个项目',
-  },
-  industrial: {
-    label: 'Industrial',
-    caption: '产品结构、CMF、场景和渲染证据',
-  },
-  ux: {
-    label: 'UX Prototype',
-    caption: '用户流程、交互原型和可运行演示',
-  },
-  ai: {
-    label: 'AI Workflow',
-    caption: 'AI 辅助建模、渲染和视频表达流程',
-  },
-};
-
-const slides: PortfolioSlide[] = [
-  {
-    id: 'cover',
-    kind: 'cover',
-    title: '孙启圣作品集',
-    subtitle: 'ANDRE SUN PORTFOLIO',
-    accent: 'teal',
-    summary: 'Product & Experience Design Portfolio',
-    tags: ['Industrial Design', 'UX Prototype', 'AI-assisted Workflow'],
-  },
-  {
-    id: 'contents',
-    kind: 'contents',
-    title: 'CONTENTS',
-    subtitle: '项目导航 / Hiring Evidence',
-    accent: 'gold',
-  },
-  {
-    id: 'droplet',
-    kind: 'project',
-    title: 'DROPLET',
-    subtitle: '宠物运动水杯',
-    range: 'P.03-07',
-    accent: 'black',
-    cover: './droplet-source-render-red-dot-2026.png',
-    summary: 'Red Dot Award: Design Concept Winner 2026 项目，面向户外运动场景的宠物补水产品，强调携带、饮水、回流和电解质补给的连续体验。',
-    role: '工业设计 / 场景研究 / 产品渲染与 AIGC 表达',
-    problem: '户外运动后的宠物容易出现饮水不足、补给不便和携带负担，普通水杯难以兼顾卫生、回流和营养补给。',
-    evidence: ['产品主渲染展示使用姿态和造型语言', '草图与流程图说明从问题到结构的推导', '细节图表现饮水、回流和握持关系'],
-    output: '一套获得 Red Dot Award: Design Concept Winner 2026 的宠物运动水杯概念，覆盖使用流程、结构表达、外观渲染和场景化展示。',
-    tools: 'Sketch / Rhino / KeyShot / Midjourney / Photoshop',
-    aiRole: 'AI 用于快速探索产品场景、材质氛围和展示页视觉，再结合草图与结构图收敛方案。',
-    tags: ['RED DOT 2026', 'PET PRODUCT', 'SCENARIO RESEARCH', 'PRODUCT RENDER'],
-    jobTracks: ['industrial', 'ai'],
-    gallery: [
-      {
-        src: './droplet-source-render-red-dot-2026.png',
-        label: 'SOURCE RENDER',
-        caption: '主渲染用于呈现产品姿态、比例、户外运动情境和 Red Dot 2026 获奖标识。',
-        evidenceType: 'Hero render',
-      },
-      {
-        src: './droplet-gallery-1.webp',
-        label: 'A4 LAYOUT 1',
-        caption: '参赛图板 1 展示设计理念与整体造型。',
-        evidenceType: 'Render evidence',
-      },
-      {
-        src: './droplet-gallery-2.webp',
-        label: 'A4 LAYOUT 2',
-        caption: '参赛图板 2 表现功能细节与手持体验。',
-        evidenceType: 'Render evidence',
-      },
-      {
-        src: './droplet-gallery-3.webp',
-        label: 'A4 LAYOUT 3',
-        caption: '参赛图板 3 展现使用场景与色彩搭配。',
-        evidenceType: 'Usage evidence',
-      },
-      {
-        src: './droplet-gallery-4.webp',
-        label: 'A4 LAYOUT 4',
-        caption: '参赛图板 4 阐述技术细节与结构推导。',
-        evidenceType: 'Usage evidence',
-      },
-      {
-        src: './droplet-gallery-5.webp',
-        label: 'A4 LAYOUT 5',
-        caption: '参赛图板 5 说明内部气流与水流控制。',
-        evidenceType: 'Usage evidence',
-      },
-      {
-        src: './droplet-gallery-6.webp',
-        label: 'A4 LAYOUT 6',
-        caption: '参赛图板 6 强调便携性与户外携带场景。',
-        evidenceType: 'Usage evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: '户外运动后的宠物补水体验',
-        body: 'DROPLET 把便携补水、营养补给和回流清洁压缩到单一产品动作中。',
-        bullets: ['对象：户外运动宠物和主人', '目标：减少补水和携带负担', '产出：产品概念和场景渲染'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: '场景先行的产品推导',
-        body: '从户外运动后的脱水风险切入，推导出握持、饮水、回流和补给结构。',
-        bullets: ['场景痛点梳理', '草图形态探索', '使用流程闭环'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: '从草图到渲染的完整表达',
-        body: '最终页面同时呈现草图、流程、渲染和场景，使产品方案更容易被岗位筛选者判断。',
-        bullets: ['草图板', '产品渲染', '使用流程图'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI 加速视觉探索',
-        body: 'AI 辅助建立产品展示氛围和视觉叙事，再由产品逻辑筛选可用方向。',
-        bullets: ['场景氛围生成', '材质和光影探索', '与手绘和建模结果交叉验证'],
-      },
-    ],
-  },
-  {
-    id: 'wrist',
-    kind: 'project',
-    title: 'WRIST REHABILITATION',
-    subtitle: '腕部康复评估设计',
-    range: 'P.08-12',
-    accent: 'teal',
-    cover: './rehab-phone-mockup.png',
-    video: './fracture-rehab-demo.mp4',
-    summary: '面向居家康复阶段的交互原型，以安全确认、动作反馈和训练结果可视化构成完整体验闭环。',
-    role: 'UX 原型设计 / 本地 Demo 搭建 / 交互流程验证',
-    problem: '骨折或腕部损伤用户在居家训练中缺少即时反馈，容易出现动作不标准、训练中断和恢复结果不可见的问题。',
-    evidence: ['安全确认与训练前校准流程', '动作识别评分与结果反馈界面', '可播放的本地样机视频和多屏 UI 证据'],
-    output: '一套可演示的腕部康复训练 App 原型，覆盖开始训练、动作反馈、结果复盘和任务延展。',
-    tools: 'React Demo / Vibe Coding / UI Mockup / Video Prototype',
-    aiRole: 'AI 用于辅助生成界面素材、演示叙事和快速迭代视觉状态，最终流程由交互逻辑约束。',
-    tags: ['UX PROTOTYPE', 'HEALTH REHAB', 'LOCAL DEMO', 'FLOW + UI + VIDEO'],
-    jobTracks: ['ux', 'ai'],
-    gallery: [
-      {
-        src: './rehab-source-render.png',
-        label: 'UI SOURCE',
-        caption: '康复 App 的核心界面视觉，证明原型不是静态概念，而是围绕训练流程组织的界面系统。',
-        evidenceType: 'Prototype evidence',
-      },
-      {
-        src: './fracture-rehab-flow.jpg',
-        label: '4 STEP FLOW',
-        caption: '四步训练路径用于说明用户如何从校准进入训练，再回到结果反馈。',
-        evidenceType: 'Flow evidence',
-      },
-      {
-        src: './fracture-rehab-board.jpg',
-        label: 'RESEARCH BOARD',
-        caption: '问题拆解和前期研究板，说明康复训练的约束、风险和机会点。',
-        evidenceType: 'Research evidence',
-      },
-      {
-        src: './fracture-rehab-demo.mp4',
-        label: 'DEMO VIDEO',
-        type: 'video',
-        caption: '本地样机展示视频，用于验证界面节奏、交互反馈和演示完整度。',
-        evidenceType: 'Motion evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: '居家康复的可见反馈',
-        body: '项目把康复训练从“完成动作”转化为“可判断、可记录、可复盘”的交互流程。',
-        bullets: ['目标用户：居家康复训练人群', '核心价值：降低训练不确定性', '交付物：可播放 App 原型和流程页'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: '从安全校准到结果复盘',
-        body: '流程优先处理康复产品最关键的安全感，再进入动作识别和训练反馈。',
-        bullets: ['训练前检查和校准', '动作过程中的反馈节奏', '训练后结果和任务映射'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: 'Demo 可以直接说明体验',
-        body: '图片、流程图和视频共同组成招聘场景下可快速判断的 UX 证据。',
-        bullets: ['界面系统', '四步用户流', '可播放视频样机'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI 作为表达和迭代工具',
-        body: 'AI 辅助生成演示状态和视觉资产，但交互逻辑、流程结构和内容判断仍由设计目标决定。',
-        bullets: ['快速生成界面情境', '辅助视频表达', '保留可解释的流程结构'],
-      },
-    ],
-  },
-  {
-    id: 'aquara',
-    kind: 'project',
-    title: 'AQUARA',
-    subtitle: '鱼缸清洁机器人',
-    range: 'P.13-17',
-    accent: 'gold',
-    cover: './aqua-robot-cover.webp',
-    summary: '围绕中大型鱼缸清洁痛点，提出自动爬壁清洁、回仓充电和自清洁结合的产品方案。',
-    role: '工业设计 / 产品策略 / 结构与 CMF 表达',
-    problem: '中大型鱼缸绿藻积累快，人工清洁频率高且容易打扰鱼群，用户需要低干预、稳定维护的清洁方案。',
-    evidence: ['六视图用于验证形体和比例', '系统图说明回仓、自清洁与工作路径', '细节渲染呈现结构、材质和使用场景'],
-    output: '一套面向家庭水族场景的机器人产品概念，包含主机、充电回仓、清洁路径和视觉渲染。',
-    tools: 'Rhino / KeyShot / Photoshop / AI-assisted Rendering',
-    aiRole: 'AI 用于辅助渲染气质、构图探索和视觉表达，核心产品逻辑来自场景痛点和结构设定。',
-    tags: ['INDUSTRIAL DESIGN', 'ROBOTICS', 'CMF', 'AI RENDERING'],
-    jobTracks: ['industrial', 'ai'],
-    gallery: [
-      {
-        src: './aqua-robot-views.webp',
-        label: 'SIX VIEWS',
-        caption: '六视图展示产品比例、轮廓和关键面关系，是工业设计岗位最直接的形体证据。',
-        evidenceType: 'Form evidence',
-      },
-      {
-        src: './aqua-robot-system.webp',
-        label: 'SYSTEM CARD',
-        caption: '系统卡片说明清洁机器人、回仓和使用场景之间的产品逻辑。',
-        evidenceType: 'System evidence',
-      },
-      {
-        src: './aqua-robot-detail.webp',
-        label: 'DETAIL RENDER',
-        caption: '细节渲染呈现结构分件、材质对比和产品识别特征。',
-        evidenceType: 'CMF evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: '让鱼缸维护变成低干预流程',
-        body: 'AQUARA 把清洁、回仓和自清洁整合成一个家庭水族维护系统。',
-        bullets: ['场景：1.2 米以上中大型鱼缸', '对象：绿藻、玻璃壁、水质维护', '产出：机器人和回仓系统概念'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: '从痛点到结构路径',
-        body: '项目优先建立工作路径和使用边界，再通过形体推敲表达产品可信度。',
-        bullets: ['清洁路径推演', '回仓和自清洁逻辑', '外观比例和结构分件'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: '工业设计证据完整',
-        body: '六视图、系统卡和细节渲染共同支撑产品概念，而不是单张效果图。',
-        bullets: ['六视图', '系统说明', '细节和材质渲染'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI 辅助表达但不替代结构',
-        body: 'AI 用于提升渲染表达和场景气质，产品结构和功能路径在设计判断中先行。',
-        bullets: ['渲染氛围探索', '构图和材质迭代', '最终页面回到产品证据'],
-      },
-    ],
-  },
-  {
-    id: 'cookware',
-    kind: 'project',
-    title: 'OUTDOOR COOKWARE',
-    subtitle: '家庭户外炊具设计',
-    range: 'P.18-22',
-    accent: 'gold',
-    cover: './cookware-hero.webp',
-    summary: '面向家庭户外烹饪场景的炊具产品，围绕安全、便携、收纳和多功能烹饪建立完整的产品方案。',
-    role: '本科毕业设计 / 工业设计 / 产品建模与渲染 / 展板表达',
-    problem: '家庭用户在户外野炊时会遇到传统明火炉具安全隐患、分体式套锅携带收纳繁琐、组件易丢失等问题。',
-    evidence: ['新渲染图呈现产品主体、套锅和户外使用情境', '展板裁剪保留草图推导、细节展示和场景说明', '工程图说明尺寸、结构关系和可制造性表达'],
-    output: '一套家庭户外炊具概念，覆盖产品外观、套锅收纳、香料/配件模块、工程尺寸、展板和论文说明。',
-    tools: 'Rhino / KeyShot / Photoshop / Product Board / Thesis Writing',
-    aiRole: 'AI 用于辅助提升渲染表达和户外场景氛围，产品结构、论文论证和展板组织来自毕业设计过程。',
-    tags: ['GRADUATION DESIGN', 'OUTDOOR COOKWARE', 'PRODUCT RENDER', 'ENGINEERING DRAWING'],
-    jobTracks: ['industrial', 'ai'],
-    gallery: [
-      {
-        src: './cookware-context.webp',
-        label: 'CONTEXT RENDER',
-        caption: '户外场景渲染用于说明家庭露营、桌面烹饪和产品使用环境之间的关系。',
-        evidenceType: 'Scenario render',
-      },
-      {
-        src: './cookware-studio.webp',
-        label: 'STUDIO RENDER',
-        caption: '工作室角度展示主体、内胆套锅、侧向配件托盘和整体黑白 CMF。',
-        evidenceType: 'Product render',
-      },
-      {
-        src: './cookware-board-sketch.webp',
-        label: 'SKETCH BOARD',
-        caption: '从展板中裁出的草图过程，保留造型推导、套锅结构和外壳比例探索。',
-        evidenceType: 'Process evidence',
-      },
-      {
-        src: './cookware-engineering.webp',
-        label: 'ENGINEERING',
-        caption: '工程图呈现产品主视、侧视、俯视和关键尺寸，补足渲染之外的结构证据。',
-        evidenceType: 'Drawing evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: '面向家庭户外烹饪的安全便携炊具',
-        body: '项目从家庭户外野炊场景切入，把安全性、便携收纳和多功能烹饪整合进一个炊具系统。',
-        bullets: ['目标用户：家庭露营和户外野餐用户', '核心价值：降低明火风险与组件管理负担', '产出：产品方案、工程图、展板和论文说明'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: '从论文问题到产品结构',
-        body: '论文和设计过程共同指向传统明火炉具风险、套锅携带繁琐和组件丢失等问题，再转化为套锅收纳、配件托盘和一体化外壳。',
-        bullets: ['竞品和用户问题梳理', '草图形态与功能模块推导', '展板中保留尺寸、细节和场景证据'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: '渲染、展板和工程图共同说明方案',
-        body: '新渲染作为主视觉，展板裁剪提供过程证据，工程图补充尺寸和结构表达，避免只依赖单张效果图。',
-        bullets: ['主产品渲染', '展板过程裁剪', '工程尺寸图'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI 用于强化场景表达',
-        body: 'AI 主要参与渲染清晰度和户外氛围优化，最终页面仍以建模、展板和论文内容为判断依据。',
-        bullets: ['提升产品渲染质量', '辅助户外场景氛围', '保留结构与论文证据'],
-      },
-    ],
-  },
-  {
-    id: 'contact',
-    kind: 'contact',
-    title: 'CONTACT',
-    subtitle: '联系 / 个人信息',
-    accent: 'teal',
-    summary: '孙启圣 / 产品设计硕士在读 / AI 视觉与交互原型方向',
-    tags: ['Rhino', 'KeyShot', 'Blender', 'Photoshop', 'Illustrator', 'Midjourney', 'AI 视频生成', '后期制作'],
-  },
-];
-
-const projectSlides = slides.filter((slide): slide is PortfolioSlide & { kind: 'project' } => slide.kind === 'project');
 
 function isInteractiveTarget(target: EventTarget | null) {
   const element = target instanceof Element ? target : null;
@@ -645,7 +244,7 @@ function App() {
     cookware: 'overview',
   });
   const [activeMedia, setActiveMedia] = useState<ActiveMedia | null>(null);
-  const [antigravityOpen, setAntigravityOpen] = useState(false);
+  const [antigravityOpen, setAntigravityOpen] = useState(true);
   const triggerRef = useRef<HTMLElement | null>(null);
   const pager = useDirectionalPager(slides.length, Boolean(activeMedia) || antigravityOpen);
   const activeSlide = slides[pager.currentIndex];
@@ -791,7 +390,7 @@ function App() {
       )}
 
       {antigravityOpen && createPortal(
-        <AntigravityPlayground onClose={() => setAntigravityOpen(false)} />,
+        <AntigravityPlayground />,
         document.body,
       )}
     </main>
@@ -1119,6 +718,18 @@ function ProjectSlide({
         </div>
 
         <div className="project-bottom-row">
+          {slide.demoUrl && (
+            <a
+              className="play-demo playable-demo"
+              href={slide.demoUrl}
+              target="_blank"
+              rel="noreferrer"
+              data-no-page-swipe="true"
+            >
+              <ExternalLink size={17} />
+              TRY PLAYABLE DEMO
+            </a>
+          )}
           {slide.video && (
             <button
               className="play-demo"

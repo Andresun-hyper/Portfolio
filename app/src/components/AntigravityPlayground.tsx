@@ -1,391 +1,342 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import * as MatterLib from 'matter-js';
 import {
-  ArrowDown,
   ArrowLeft,
   ArrowRight,
+  Box,
   ExternalLink,
   FileText,
   Github,
+  House,
+  ChevronDown,
   Mail,
   MessageCircle,
-  MousePointer2,
+  Menu,
   Phone,
   Play,
-  RotateCcw,
   Search,
   X,
   ZoomIn,
 } from 'lucide-react';
+import { antigravityContent, contact, portfolioContent } from '../content/portfolio';
+import { modelPreviews } from '../content/model-previews';
+import type { ModelPreviewConfig } from '../content/model-previews.schema';
+import type { Accent, AntigravityProject, GalleryItem, ProjectTab, ProjectTabKey } from '../content/portfolio.schema';
 
-const MATTER_CDN = 'https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js';
-const RESUME_FILE = './孙启圣_工业设计实习生_简历_红点2026.pdf';
-const GITHUB_URL = 'https://github.com/Andresun-hyper';
-const WECHAT_ID = 's18715111179';
+const ModelViewer = lazy(() => import('./ModelViewer'));
 
-const SEARCH_SUGGESTIONS = [
-  '孙启圣 PDF Resume',
-  'DROPLET Bottle',
-  'Wrist Rehabilitation',
-  'AQUARA Robot',
-  'Outdoor Cookware',
-  'Industrial Design',
-  'UX Prototype',
-  'AI Workflow',
+const { githubUrl: GITHUB_URL, resumeFile: RESUME_FILE, wechatId: WECHAT_ID } = contact;
+const { skillTags, projects } = antigravityContent;
+const PROJECT_SUGGESTIONS = projects.map(project => ({
+  label: project.title,
+  target: project.id,
+}));
+
+type SearchAlias = {
+  target: OpenTarget;
+  terms: string[];
+};
+
+const FUZZY_MATCH_THRESHOLD = 55;
+
+const PROJECT_SEARCH_ALIASES: Record<string, string[]> = {
+  droplet: [
+    'droplet', 'droplet bottle', 'pet bottle', 'water bottle', 'hydration', 'pet hydration',
+    'pet product', 'outdoor pet', 'outdoor exercise', 'portable bottle', 'supplement',
+    'electrolyte', 'visible hygiene', 'water path', 'grip', 'scenario research', 'product render',
+    'product rendering', 'industrial design', 'cmf', 'sketch', 'rhino', 'keyshot', 'midjourney',
+    'photoshop', 'red dot', 'red dot award', 'design concept winner', 'winner 2026',
+    '获奖', '获奖项目', '获奖作品', '获奖经历', '奖项', '红点', '红点奖', '红点奖项', '红点奖获奖',
+    '宠物', '宠物产品', '宠物饮水', '宠物水瓶', '宠物水杯', '户外宠物', '户外运动', '运动饮水',
+    '便携水瓶', '补水', '电解质补充', '透明水路', '可视卫生', '握持', '场景研究', '产品渲染',
+    '工业设计', '材质', '材质研究',
+  ],
+  wrist: [
+    'wrist', 'wrist rehabilitation', 'rehab', 'rehabilitation', 'fracture', 'fracture rehab',
+    'health rehab', 'home rehab', 'rehab app', 'rehab game', 'local demo', 'react demo',
+    'ui mockup', 'video prototype', 'motion feedback', 'calibration', 'training', 'scoring',
+    'review', 'interaction flow', 'ux prototype', '骨折', '骨折康复', '腕部', '腕部康复',
+    '手腕', '手腕康复', '康复', '康复训练', '康复游戏', '康复应用', '康复app', '健康',
+    '居家康复', '训练反馈', '动作反馈', '动作识别', '校准', '训练评分', '训练结果', '复盘',
+    '交互流程', '用户流程', '交互原型', '可玩demo', '演示视频',
+  ],
+  aquara: [
+    'aquara', 'aquarium', 'aquarium robot', 'fish tank', 'fish tank robot', 'cleaning robot',
+    'robotics', 'wall cleaning', 'dock charging', 'self cleaning', 'charging dock', 'cmf',
+    'industrial design', 'product strategy', 'structure', 'robot', 'aquarium cleaning',
+    '水族箱', '鱼缸', '鱼缸清洁', '鱼缸机器人', '清洁机器人', '水族机器人', '机器鱼缸', '机器人',
+    '自动清洁', '壁面清洁', '充电底座', '自动回充', '产品策略', '结构设计', '工业设计', 'cmf',
+  ],
+  cookware: [
+    'outdoor cookware', 'cookware', 'outdoor cooking', 'camp cooking', 'camp kitchen',
+    'graduation design', 'thesis', 'engineering drawing', 'product system', 'product render',
+    'rhino', 'keyshot', 'photoshop', 'outdoor', 'cook set', 'nesting pot', 'camping',
+    '户外炊具', '户外烹饪', '户外做饭', '露营炊具', '露营', '家用户外', '毕业设计', '毕业作品',
+    '论文', '论文课题', '工程图', '产品系统', '锅具', '套锅', '收纳', '安全', '烹饪行为',
+    '工业设计', '产品建模', '产品渲染',
+  ],
+};
+
+const PERSONAL_SEARCH_ALIASES: SearchAlias[] = [
+  {
+    target: 'resume',
+    terms: [
+      'resume', 'cv', 'pdf resume', 'curriculum vitae', 'about me', 'profile', 'bio', 'personal profile',
+      'education', 'academic', 'degree', 'university', 'graduate student', 'master', 'bachelor',
+      'shanghai university of engineering science', 'hezhou university', 'product design',
+      'work experience', 'work history', 'employment', 'internship', 'internship experience',
+      'campus experience', 'project experience', 'experience', 'skills', 'skillset', 'toolset',
+      'honors', 'honours', 'award history', 'awards', 'award experience', 'selected honors',
+      '获奖', '获奖经历', '获奖记录', '奖项', '荣誉', '荣誉奖项', '获奖情况', '获奖作品',
+      '工作经历', '工作经验', '工作履历', '实习经历', '实习经验', '校园经历', '项目经历',
+      '教育经历', '教育背景', '学历', '硕士', '本科', '研究生', '在读', '毕业', '个人简历',
+      '上海工程技术大学', '贺州学院', '产品设计', '工业设计专业',
+      '简历', '个人资料', '个人信息', '个人介绍', '关于我', '经历', '技能', '专业技能', '工具',
+      '字节跳动', '字节实习', 'bytedance', '易班', '校园工作', '摄影比赛', '安徽省大学生摄影大赛',
+      '年龄', 'age', 'born', 'birth', 'birthday', '出生', '出生日期', '生日',
+    ],
+  },
+  {
+    target: 'contact',
+    terms: [
+      'contact', 'contact me', 'phone', 'telephone', 'mobile', 'email', 'mail', 'github', 'wechat',
+      '联系方式', '联系', '联系我', '电话', '手机', '邮箱', '电子邮箱', '微信', '微信公众号', '社交账号',
+      '姓名', '名字', '作者', '设计师', '孙启圣', 'andre sun', 'sun qisheng', 'andresun',
+    ],
+  },
 ];
 
-const skillTags = [
-  { title: 'Industrial Design', detail: 'form / CMF / systems' },
-  { title: 'UX Prototype', detail: 'flow / UI / demo' },
-  { title: 'AI Workflow', detail: 'visual iteration' },
-  { title: 'Rhino / KeyShot', detail: 'product rendering' },
-  { title: 'React Demo', detail: 'interactive proof' },
-  { title: 'Portfolio Storytelling', detail: 'hiring evidence' },
-];
-
-type Accent = 'teal' | 'gold' | 'black';
-type ProjectId = 'wrist' | 'aquara' | 'droplet' | 'cookware';
+type Project = AntigravityProject;
+type ProjectId = Project['id'];
+type Language = 'en' | 'zh';
 type OpenTarget = 'home' | 'projects' | 'contact' | 'resume' | 'github' | 'search' | ProjectId;
-type ProjectTabKey = 'overview' | 'process' | 'output' | 'ai';
 type SectionId = 'home' | 'projects' | 'contact';
 
-interface GalleryItem {
-  src: string;
-  label: string;
-  caption: string;
-  evidenceType: string;
-  type?: 'image' | 'video';
-}
+const PROJECT_CARD_COVERS: Partial<Record<ProjectId, string>> = {
+  droplet: './droplet-shop/droplet-shop-01.jpg',
+};
 
-interface ProjectTab {
-  id: ProjectTabKey;
-  label: string;
+type ModelPreview = {
   title: string;
-  body: string;
-  bullets: string[];
-}
+  config: ModelPreviewConfig;
+};
 
-interface Project {
-  id: ProjectId;
+const MODEL_ASSET_PREVIEWS: Partial<Record<ProjectId, ModelPreview>> = {
+  droplet: {
+    title: 'DROPLET MODEL PREVIEW',
+    config: modelPreviews.droplet,
+  },
+  aquara: {
+    title: 'AQUARA MODEL PREVIEW',
+    config: modelPreviews.aquara!,
+  },
+};
+
+const SKILL_TAG_ZH: Record<string, string> = {
+  'Industrial Design': '工业设计',
+  'UX Prototype': 'UX 原型',
+  'AI Workflow': 'AI 流程',
+  'Rhino / KeyShot': 'Rhino / KeyShot',
+  'React Demo': 'React Demo',
+  'Portfolio Storytelling': '作品集叙事',
+};
+
+const UI_COPY = {
+  en: {
+    home: 'Home',
+    works: 'Works',
+    contact: 'Contact',
+    languageButton: '中文',
+    languageLabel: 'Switch to Chinese',
+    gravity: 'GRAVITY',
+    on: 'ON',
+    off: 'OFF',
+    back: 'Back',
+    role: 'Role',
+    problem: 'Problem',
+    output: 'Output',
+    tools: 'Tools',
+    sections: 'sections',
+    openImage: 'OPEN IMAGE',
+    playableDemo: 'TRY PLAYABLE DEMO',
+    playVideo: 'PLAY DEMO VIDEO',
+    aiRole: 'AI role',
+    closeMedia: 'Close media',
+    previousMedia: 'Previous media',
+    nextMedia: 'Next media',
+    openResume: 'Open Resume PDF',
+    search: 'Search portfolio',
+    try: 'TRY',
+  },
+  zh: {
+    home: '首页',
+    works: '作品',
+    contact: '联系',
+    languageButton: 'EN',
+    languageLabel: '切换为英文',
+    gravity: '重力',
+    on: '开启',
+    off: '关闭',
+    back: '返回',
+    role: '职责',
+    problem: '问题',
+    output: '成果',
+    tools: '工具',
+    sections: '项目分区',
+    openImage: '打开图片',
+    playableDemo: '打开可交互 Demo',
+    playVideo: '播放演示视频',
+    aiRole: 'AI 参与方式',
+    closeMedia: '关闭媒体',
+    previousMedia: '上一张媒体',
+    nextMedia: '下一张媒体',
+    openResume: '打开简历 PDF',
+    search: '搜索作品集',
+    try: '推荐',
+  },
+} as const;
+
+interface ProjectTranslation {
   title: string;
   subtitle: string;
-  range: string;
-  accent: Accent;
-  cover: string;
   summary: string;
   role: string;
   problem: string;
   output: string;
   tools: string;
   aiRole: string;
-  tags: string[];
-  gallery: GalleryItem[];
-  tabs: ProjectTab[];
+  tags: Record<string, string>;
+  tabs: Record<ProjectTabKey, Pick<ProjectTab, 'label' | 'title' | 'body' | 'bullets'>>;
+  gallery: Record<string, Pick<GalleryItem, 'label' | 'caption' | 'evidenceType'>>;
+}
+
+const PROJECT_ZH: Record<ProjectId, ProjectTranslation> = {
+  droplet: {
+    title: 'DROPLET',
+    subtitle: '户外宠物饮水产品',
+    summary: 'Red Dot Award: Design Concept Winner 2026 获奖项目，面向户外运动场景的宠物补水产品。',
+    role: '工业设计 / 场景研究 / 产品渲染与 AIGC 表达',
+    problem: '户外运动后的宠物容易遇到饮水不足、补给不便和携带负担问题，普通水杯难以同时满足卫生、便携与营养补给。',
+    output: '一套覆盖使用流程、结构表达、外观渲染与场景展示的宠物运动饮水产品概念。',
+    tools: 'Sketch / Rhino / KeyShot / Midjourney / Photoshop',
+    aiRole: 'AI 用于快速探索产品场景、材质氛围与展示视觉，再结合草图和结构图收敛方案。',
+    tags: {
+      'RED DOT 2026': '红点 2026',
+      'PET PRODUCT': '宠物产品',
+      'SCENARIO RESEARCH': '场景研究',
+      'PRODUCT RENDER': '产品渲染',
+      CMF: 'CMF 材质',
+    },
+    tabs: {
+      overview: { label: '概览', title: '户外运动后的宠物补水体验', body: 'DROPLET 将便携补水、营养补给与可视化清洁压缩进一个产品动作。', bullets: ['荣誉：Red Dot Award 2026', '用户：户外宠物与主人', '目标：降低补水与携带负担', '成果：产品概念与场景渲染'] },
+      process: { label: '过程', title: '场景驱动的产品推导', body: '从户外运动后的脱水风险切入，逐步推导握持、饮水、透明水路与补给结构。', bullets: ['场景痛点梳理', '草图形态探索', '一体化使用流程'] },
+      output: { label: '成果', title: '从草图到渲染的完整表达', body: '草图、流程图、产品渲染与场景图共同让方案更容易被理解和评估。', bullets: ['草图展板', '产品渲染', '使用流程细节'] },
+      ai: { label: 'AI 流程', title: 'AI 加速视觉探索', body: 'AI 协助建立展示氛围与视觉叙事，再由产品逻辑筛选可用方向。', bullets: ['场景氛围生成', '材质与光影探索', '与手绘和建模结果交叉验证'] },
+    },
+    gallery: {
+      'SOURCE RENDER': { label: '源渲染', evidenceType: '主视觉证据', caption: '展示产品姿态、比例与户外运动使用场景的主渲染图。' },
+      'A4 LAYOUT 1': { label: 'A4 展板 1', evidenceType: '渲染证据', caption: '展示设计概念与整体造型的 A4 展板。' },
+      'A4 LAYOUT 2': { label: 'A4 展板 2', evidenceType: '渲染证据', caption: '表现功能细节与手持体验的 A4 展板。' },
+      'A4 LAYOUT 3': { label: 'A4 展板 3', evidenceType: '使用证据', caption: '展示使用场景与色彩搭配的 A4 展板。' },
+      'A4 LAYOUT 4': { label: 'A4 展板 4', evidenceType: '使用证据', caption: '说明技术细节与结构推导的 A4 展板。' },
+      'A4 LAYOUT 5': { label: 'A4 展板 5', evidenceType: '使用证据', caption: '说明内部气流、透明水路与功能细节的 A4 展板。' },
+      'A4 LAYOUT 6': { label: 'A4 展板 6', evidenceType: '使用证据', caption: '强调便携性与户外携带场景的 A4 展板。' },
+    },
+  },
+  wrist: {
+    title: '腕部康复',
+    subtitle: '居家康复 UX 原型',
+    summary: '面向居家康复阶段的交互原型，以安全确认、动作反馈和训练结果可视化构成完整体验闭环。',
+    role: 'UX 原型设计 / 本地 Demo 搭建 / 交互流程验证',
+    problem: '骨折或腕部损伤用户在居家训练中缺少即时反馈，容易出现动作不标准、训练中断和恢复结果不可见的问题。',
+    output: '一套解释校准、训练、评分、复盘与任务延续的可交互应用原型和视频证据。',
+    tools: 'React Demo / UI Mockup / Video Prototype',
+    aiRole: 'AI 用于加速界面状态、Demo 叙事与视觉迭代，交互结构仍由康复场景与设计逻辑主导。',
+    tags: { 'UX PROTOTYPE': 'UX 原型', 'HEALTH REHAB': '健康康复', 'LOCAL DEMO': '本地 Demo', 'FLOW + UI + VIDEO': '流程 + UI + 视频' },
+    tabs: {
+      overview: { label: '概览', title: '让居家康复反馈可见', body: '项目将模糊的“完成训练”转化为用户可以判断、记录和复盘的过程。', bullets: ['目标用户：居家康复训练者', '核心价值：降低训练不确定性', '交付物：可交互应用原型与流程页面'] },
+      process: { label: '过程', title: '从安全校准到结果复盘', body: '流程先处理安全与信心，再进入动作识别、评分反馈和任务延续。', bullets: ['训练前检查与校准', '动作过程中的反馈', '训练后结果与任务映射'] },
+      output: { label: '成果', title: '直接解释体验的 Demo', body: 'UI、流程图与视频共同构成可快速评估的招聘展示证据。', bullets: ['界面系统', '四步用户流程', '可播放视频样片'] },
+      ai: { label: 'AI 流程', title: 'AI 作为迭代支持', body: 'AI 协助生成界面状态和 Demo 素材，产品逻辑仍受康复场景约束。', bullets: ['快速界面氛围探索', 'Demo 叙事支持', '可解释的交互结构'] },
+    },
+    gallery: {
+      'UI SOURCE': { label: 'UI 源稿', evidenceType: '原型证据', caption: '围绕训练流程组织的核心应用界面证据。' },
+      '4 STEP FLOW': { label: '四步流程', evidenceType: '流程证据', caption: '展示用户从校准进入训练，再回到结果反馈的四步流程。' },
+      'RESEARCH BOARD': { label: '研究板', evidenceType: '研究证据', caption: '说明康复约束、风险与交互机会的问题框定与早期研究。' },
+      'MOTION DEMO': { label: '动作 Demo', evidenceType: '动效证据', caption: '展示动作反馈、评分状态和训练节奏的演示素材。' },
+    },
+  },
+  aquara: {
+    title: 'AQUARA',
+    subtitle: '鱼缸清洁机器人',
+    summary: '面向中大型鱼缸维护的产品系统，将清洁、充电停靠与自维护整合为连续的家庭护理体验。',
+    role: '工业设计 / 产品策略 / 结构与 CMF 表达',
+    problem: '大型鱼缸容易快速积累藻类，人工清洁频繁、打扰大，也很难保持稳定一致的清洁效果。',
+    output: '一套覆盖机器人主体、充电底座、清洁路径与视觉展示系统的产品概念。',
+    tools: 'Rhino / KeyShot / Photoshop / AI-assisted Rendering',
+    aiRole: 'AI 协助探索渲染氛围和视觉方向，产品路径与结构来自真实使用场景的约束。',
+    tags: { 'INDUSTRIAL DESIGN': '工业设计', ROBOTICS: '机器人', CMF: 'CMF 材质', 'AI RENDERING': 'AI 渲染' },
+    tabs: {
+      overview: { label: '概览', title: '低干预的鱼缸清洁系统', body: 'AQUARA 将清洁、停靠与自维护整合为一个家庭鱼缸护理系统。', bullets: ['场景：中大型鱼缸', '目标：藻类与缸壁清洁', '成果：机器人与底座概念'] },
+      process: { label: '过程', title: '从痛点到产品路径', body: '项目先定义工作边界与清洁路径，再用形态迭代让产品逻辑变得可信。', bullets: ['清洁路径推导', '停靠与自清洁逻辑', '形态比例与结构组件'] },
+      output: { label: '成果', title: '完整的工业设计证据', body: '多视图、系统卡片和细节渲染让概念不只停留在一张主视觉图。', bullets: ['六视图', '系统说明', '细节与材质渲染'] },
+      ai: { label: 'AI 流程', title: 'AI 服务于表达，而非结构', body: 'AI 协助探索展示质量，功能和装配逻辑仍由设计判断确定。', bullets: ['渲染氛围探索', '构图迭代', '以产品逻辑为锚点的最终证据'] },
+    },
+    gallery: {
+      'SIX VIEWS': { label: '六视图', evidenceType: '形态证据', caption: '展示产品比例、表面关系与关键形态决策的六视图证据。' },
+      'SYSTEM CARD': { label: '系统卡片', evidenceType: '系统证据', caption: '说明机器人、底座与鱼缸清洁场景关系的系统卡片。' },
+      'CMF BOARD': { label: 'CMF 展板', evidenceType: 'CMF 证据', caption: '展示材质、色彩与表面处理方向的 CMF 展板。' },
+    },
+  },
+  cookware: {
+    title: '户外炊具',
+    subtitle: '家庭户外烹饪系统',
+    summary: '将家庭户外烹饪问题转化为紧凑的产品系统，整合安全、收纳、携带与烹饪行为。',
+    role: '毕业设计 / 工业设计 / 产品建模与渲染',
+    problem: '家庭野餐面临明火安全、炊具分散笨重和配件容易丢失等户外烹饪问题。',
+    output: '一套覆盖炉体、嵌套锅、配件托盘、工程图、展示板与论文问题框定的完整产品概念。',
+    tools: 'Rhino / KeyShot / Photoshop / Product Board / Thesis Writing',
+    aiRole: 'AI 协助提升渲染清晰度与户外场景氛围，产品结构、论文论证与展板组织来自毕业设计过程。',
+    tags: { 'GRADUATION DESIGN': '毕业设计', 'OUTDOOR COOKWARE': '户外炊具', 'PRODUCT RENDER': '产品渲染', 'ENGINEERING DRAWING': '工程图' },
+    tabs: {
+      overview: { label: '概览', title: '更安全的家庭户外炊具概念', body: '项目将家庭户外烹饪问题转化为结合安全、收纳、携带和烹饪行为的紧凑产品系统。', bullets: ['用户：家庭露营与野餐人群', '价值：降低安全与收纳摩擦', '交付物：渲染、展板、工程图与论文框定'] },
+      process: { label: '过程', title: '从论文问题到产品系统', body: '论文将明火风险、炊具分散和配件丢失定义为设计问题，再通过一体化收纳、嵌套锅与配件托盘回应。', bullets: ['竞品与用户问题框定', '草图与形态探索', '细节与场景展板证据'] },
+      output: { label: '成果', title: '渲染、展板证据与工程图', body: '新的产品渲染负责视觉表达，展板裁切与工程图让项目回到过程与结构。', bullets: ['主视觉与场景渲染', '展板过程裁切', '工程图'] },
+      ai: { label: 'AI 流程', title: 'AI 只强化展示表达', body: 'AI 用于渲染增强与户外氛围支持，最终判断仍锚定在建模、论文内容与展板证据上。', bullets: ['渲染质量支持', '户外氛围迭代', '保留结构与论文证据'] },
+    },
+    gallery: {
+      'CONTEXT RENDER': { label: '场景渲染', evidenceType: '场景证据', caption: '展示产品在家庭露营与桌面烹饪场景中的使用关系。' },
+      'STUDIO RENDER': { label: '产品渲染', evidenceType: '产品证据', caption: '说明炉体、嵌套锅、侧边配件托盘与黑白 CMF 方向。' },
+      'PROCESS BOARD': { label: '过程展板', evidenceType: '过程证据', caption: '展示从问题、草图到产品方案的过程证据。' },
+      'ENGINEERING DRAWING': { label: '工程图', evidenceType: '工程证据', caption: '展示尺寸、视图与面向制造的结构表达。' },
+    },
+  },
+};
+
+function localizeProject(project: Project, language: Language): Project {
+  if (language === 'en') return project;
+  const translation = PROJECT_ZH[project.id];
+  return {
+    ...project,
+    title: translation.title,
+    subtitle: translation.subtitle,
+    summary: translation.summary,
+    role: translation.role,
+    problem: translation.problem,
+    output: translation.output,
+    tools: translation.tools,
+    aiRole: translation.aiRole,
+    tags: project.tags.map(tag => translation.tags[tag] ?? tag),
+    tabs: project.tabs.map(tab => ({ ...tab, ...(translation.tabs[tab.id] ?? {}) })),
+    gallery: project.gallery.map(item => ({ ...item, ...(translation.gallery[item.label] ?? {}) })),
+  };
 }
 
 interface ActiveMedia {
   projectId: ProjectId;
   index: number;
 }
-
-const projects: Project[] = [
-  {
-    id: 'droplet',
-    title: 'DROPLET',
-    subtitle: 'Outdoor pet hydration product',
-    range: 'P.03-07',
-    accent: 'black',
-    cover: './droplet-source-render-red-dot-2026.png',
-    summary: 'A Red Dot Award: Design Concept Winner 2026 pet hydration product for outdoor exercise, focused on carry, drinking, backflow control, and electrolyte supplement scenarios.',
-    role: 'Industrial design / scenario research / product rendering and AIGC expression',
-    problem: 'Outdoor exercise creates hydration, hygiene, and carry problems for pets and owners that ordinary bottles do not solve cleanly.',
-    output: 'An award-recognized product concept covering usage flow, structural expression, rendering, and scenario presentation.',
-    tools: 'Sketch / Rhino / KeyShot / Midjourney / Photoshop',
-    aiRole: 'AI accelerated scenario mood and material exploration, then sketches and structure diagrams narrowed the final direction.',
-    tags: ['RED DOT 2026', 'PET PRODUCT', 'SCENARIO RESEARCH', 'PRODUCT RENDER', 'CMF'],
-    gallery: [
-      {
-        src: './droplet-source-render-red-dot-2026.png',
-        label: 'SOURCE RENDER',
-        caption: 'Main render showing posture, proportion, and outdoor exercise context.',
-        evidenceType: 'Hero render',
-      },
-      {
-        src: './droplet-gallery-1.webp',
-        label: 'A4 LAYOUT 1',
-        caption: 'A4 layout board 1 showing design concept and overall form.',
-        evidenceType: 'Render evidence',
-      },
-      {
-        src: './droplet-gallery-2.webp',
-        label: 'A4 LAYOUT 2',
-        caption: 'A4 layout board 2 explaining functional details and user grip experience.',
-        evidenceType: 'Render evidence',
-      },
-      {
-        src: './droplet-gallery-3.webp',
-        label: 'A4 LAYOUT 3',
-        caption: 'A4 layout board 3 showing outdoor exercise scenarios and colorways.',
-        evidenceType: 'Usage evidence',
-      },
-      {
-        src: './droplet-gallery-4.webp',
-        label: 'A4 LAYOUT 4',
-        caption: 'A4 layout board 4 detailing internal structures and design derivation.',
-        evidenceType: 'Usage evidence',
-      },
-      {
-        src: './droplet-gallery-5.webp',
-        label: 'A4 LAYOUT 5',
-        caption: 'A4 layout board 5 showing airflow and water flow loop control.',
-        evidenceType: 'Usage evidence',
-      },
-      {
-        src: './droplet-gallery-6.webp',
-        label: 'A4 LAYOUT 6',
-        caption: 'A4 layout board 6 highlighting portability and carry experience.',
-        evidenceType: 'Usage evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: 'Hydration after outdoor exercise',
-        body: 'DROPLET compresses carry, drinking, supplement, and backflow control into one product action.',
-        bullets: ['Award: Red Dot Award: Design Concept Winner 2026', 'Users: outdoor pets and owners', 'Goal: reduce hydration and carry burden', 'Output: concept and scenario render'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: 'Scenario-led product reasoning',
-        body: 'The project starts from dehydration risk after outdoor activity, then derives grip, drinking, backflow, and refill structure.',
-        bullets: ['Scenario pain-point mapping', 'Sketch form exploration', 'Closed-loop usage flow'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: 'From sketch to render',
-        body: 'Sketches, flow diagrams, renders, and scenarios make the product direction easier to evaluate.',
-        bullets: ['Sketch board', 'Product render', 'Usage flow detail'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI speeds visual exploration',
-        body: 'AI helped build the display atmosphere and narrative, then product logic filtered the usable direction.',
-        bullets: ['Scenario mood generation', 'Material and light exploration', 'Cross-check with sketch and model output'],
-      },
-    ],
-  },
-  {
-    id: 'wrist',
-    title: 'WRIST REHABILITATION',
-    subtitle: 'Home rehab UX prototype',
-    range: 'P.08-12',
-    accent: 'teal',
-    cover: './rehab-phone-mockup.png',
-    summary: 'A runnable rehabilitation app prototype built around safety confirmation, guided movement feedback, result review, and a replayable local demo flow.',
-    role: 'UX prototype design / local demo / interaction flow validation',
-    problem: 'Home rehabilitation users need clear safety confirmation, movement feedback, and reviewable training results without turning the product into a medical black box.',
-    output: 'A complete app prototype and video evidence set that explains calibration, training, scoring, review, and task continuation.',
-    tools: 'React Demo / UI Mockup / Video Prototype',
-    aiRole: 'AI was used to accelerate interface assets, demo narrative, and visual iteration while the interaction structure remained design-led.',
-    tags: ['UX PROTOTYPE', 'HEALTH REHAB', 'LOCAL DEMO', 'FLOW + UI + VIDEO'],
-    gallery: [
-      {
-        src: './rehab-source-render.png',
-        label: 'UI SOURCE',
-        caption: 'Core app interface evidence organized around the training flow rather than a single static screen.',
-        evidenceType: 'Prototype evidence',
-      },
-      {
-        src: './fracture-rehab-flow.jpg',
-        label: '4 STEP FLOW',
-        caption: 'A four-step flow showing how users move from calibration into training and then back to result feedback.',
-        evidenceType: 'Flow evidence',
-      },
-      {
-        src: './fracture-rehab-board.jpg',
-        label: 'RESEARCH BOARD',
-        caption: 'Problem framing and early research evidence for rehabilitation constraints, risks, and interaction opportunities.',
-        evidenceType: 'Research evidence',
-      },
-      {
-        src: './fracture-rehab-demo.mp4',
-        label: 'DEMO VIDEO',
-        type: 'video',
-        caption: 'Local prototype video used to verify rhythm, feedback, and demonstration completeness.',
-        evidenceType: 'Motion evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: 'Visible feedback for home rehab',
-        body: 'The project translates training from a vague completion task into a process users can judge, record, and review.',
-        bullets: ['Target user: home rehabilitation training', 'Core value: reduce training uncertainty', 'Deliverable: playable app prototype and flow pages'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: 'From safety calibration to result review',
-        body: 'The flow handles safety confidence first, then moves into motion recognition, score feedback, and task continuation.',
-        bullets: ['Pre-training check and calibration', 'Feedback during movement', 'Post-training result and task mapping'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: 'A demo that explains the experience directly',
-        body: 'UI, flow diagrams, and video together provide hiring evidence that can be evaluated quickly.',
-        bullets: ['Interface system', 'Four-step user flow', 'Playable video sample'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI as iteration support',
-        body: 'AI helped produce visual states and demo material, while the product logic was constrained by the rehabilitation scenario.',
-        bullets: ['Fast interface mood exploration', 'Demo storytelling support', 'Explainable interaction structure'],
-      },
-    ],
-  },
-  {
-    id: 'aquara',
-    title: 'AQUARA',
-    subtitle: 'Aquarium cleaning robot',
-    range: 'P.13-17',
-    accent: 'gold',
-    cover: './aqua-robot-cover.webp',
-    summary: 'A product concept for mid-to-large aquariums, combining wall-cleaning, dock charging, self-cleaning, form language, and CMF presentation.',
-    role: 'Industrial design / product strategy / structure and CMF expression',
-    problem: 'Large aquariums accumulate algae quickly, while manual cleaning is frequent, disruptive, and hard to keep consistent.',
-    output: 'A robot product concept covering the body, charging dock, cleaning route, and visual presentation system.',
-    tools: 'Rhino / KeyShot / Photoshop / AI-assisted Rendering',
-    aiRole: 'AI supported rendering mood and visual exploration; the product route and structure came from scenario constraints.',
-    tags: ['INDUSTRIAL DESIGN', 'ROBOTICS', 'CMF', 'AI RENDERING'],
-    gallery: [
-      {
-        src: './aqua-robot-views.webp',
-        label: 'SIX VIEWS',
-        caption: 'Six-view evidence showing product proportion, surface relationships, and key form decisions.',
-        evidenceType: 'Form evidence',
-      },
-      {
-        src: './aqua-robot-system.webp',
-        label: 'SYSTEM CARD',
-        caption: 'System card explaining the relationship between the robot, dock, and cleaning scenario.',
-        evidenceType: 'System evidence',
-      },
-      {
-        src: './aqua-robot-detail.webp',
-        label: 'DETAIL RENDER',
-        caption: 'Detail render for structure, material contrast, and product identity cues.',
-        evidenceType: 'CMF evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: 'A low-intervention cleaning system',
-        body: 'AQUARA integrates cleaning, docking, and self-maintenance into one home aquarium care system.',
-        bullets: ['Scenario: mid-to-large aquariums', 'Target: algae and wall cleaning', 'Output: robot and dock concept'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: 'From pain point to product route',
-        body: 'The project first defines work boundaries and route logic, then uses form iteration to make the product credible.',
-        bullets: ['Cleaning path reasoning', 'Docking and self-cleaning logic', 'Form proportion and structural components'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: 'Complete industrial design evidence',
-        body: 'Views, system cards, and detail rendering support the concept beyond a single hero image.',
-        bullets: ['Six views', 'System explanation', 'Detail and material render'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI supports expression, not structure',
-        body: 'AI helped explore presentation quality, while function and assembly logic were set by design judgment.',
-        bullets: ['Rendering mood exploration', 'Composition iteration', 'Final evidence anchored in product logic'],
-      },
-    ],
-  },
-  {
-    id: 'cookware',
-    title: 'OUTDOOR COOKWARE',
-    subtitle: 'Family outdoor cooking system',
-    range: 'P.18-22',
-    accent: 'gold',
-    cover: './cookware-hero.webp',
-    summary: 'An undergraduate graduation design for family outdoor cooking, focused on safer cooking, easier carrying, integrated storage, and complete product presentation.',
-    role: 'Graduation design / industrial design / product modeling and rendering',
-    problem: 'Family picnic users face open-flame safety risks, cumbersome separated cookware sets, and easily lost accessories in outdoor cooking scenarios.',
-    output: 'A full product concept covering the cooker body, nested pot, accessory tray, engineering drawing, presentation board, and thesis-based problem framing.',
-    tools: 'Rhino / KeyShot / Photoshop / Product Board / Thesis Writing',
-    aiRole: 'AI supported rendering clarity and outdoor scene mood, while the product structure, thesis argument, and board organization came from the graduation design process.',
-    tags: ['GRADUATION DESIGN', 'OUTDOOR COOKWARE', 'PRODUCT RENDER', 'ENGINEERING DRAWING'],
-    gallery: [
-      {
-        src: './cookware-context.webp',
-        label: 'CONTEXT RENDER',
-        caption: 'Outdoor context render showing how the product sits in a family camping and tabletop cooking scene.',
-        evidenceType: 'Scenario render',
-      },
-      {
-        src: './cookware-studio.webp',
-        label: 'STUDIO RENDER',
-        caption: 'Studio render explaining the body, nested pot, side accessory tray, and black-white CMF direction.',
-        evidenceType: 'Product render',
-      },
-      {
-        src: './cookware-board-sketch.webp',
-        label: 'SKETCH BOARD',
-        caption: 'Presentation board crop preserving sketch exploration, form logic, and cookware structure reasoning.',
-        evidenceType: 'Process evidence',
-      },
-      {
-        src: './cookware-engineering.webp',
-        label: 'ENGINEERING',
-        caption: 'Engineering drawing evidence for dimensions, views, and manufacturing-oriented structure expression.',
-        evidenceType: 'Drawing evidence',
-      },
-    ],
-    tabs: [
-      {
-        id: 'overview',
-        label: 'Overview',
-        title: 'A safer family outdoor cookware concept',
-        body: 'The project turns family outdoor cooking problems into a compact product system that combines safety, storage, carrying, and cooking behavior.',
-        bullets: ['Users: family camping and picnic groups', 'Value: lower safety and storage friction', 'Deliverables: renderings, board crops, drawings, and thesis framing'],
-      },
-      {
-        id: 'process',
-        label: 'Process',
-        title: 'From thesis problem to product system',
-        body: 'The thesis frames open-flame risk, scattered cookware, and accessory loss as design problems, then the product responds with integrated housing, nested pot storage, and an accessory tray.',
-        bullets: ['Competitor and user problem framing', 'Sketch and form exploration', 'Board evidence for details and scenarios'],
-      },
-      {
-        id: 'output',
-        label: 'Output',
-        title: 'Renderings, board evidence, and drawings',
-        body: 'New renders carry the visual presentation, while board crops and engineering drawings keep the project grounded in process and structure.',
-        bullets: ['Hero and context renders', 'Board process crop', 'Engineering drawing'],
-      },
-      {
-        id: 'ai',
-        label: 'AI Workflow',
-        title: 'AI strengthens presentation only',
-        body: 'AI was used for render enhancement and outdoor mood support, with final judgment anchored in modeling, thesis content, and board evidence.',
-        bullets: ['Rendering quality support', 'Outdoor atmosphere iteration', 'Structure and thesis evidence retained'],
-      },
-    ],
-  },
-];
 
 interface MatterWorld {
   gravity: {
@@ -478,43 +429,7 @@ interface PhysicsItem {
   driftSeed: number;
 }
 
-interface WindowWithMatter extends Window {
-  Matter?: MatterApi;
-}
-
-function getMatter() {
-  return (window as WindowWithMatter).Matter;
-}
-
-function loadMatter() {
-  const loaded = getMatter();
-  if (loaded) return Promise.resolve(loaded);
-
-  const existing = document.querySelector<HTMLScriptElement>(`script[src="${MATTER_CDN}"]`);
-  if (existing) {
-    return new Promise<MatterApi>((resolve, reject) => {
-      existing.addEventListener('load', () => {
-        const matter = getMatter();
-        if (matter) resolve(matter);
-        else reject(new Error('Matter.js script loaded without exposing window.Matter.'));
-      }, { once: true });
-      existing.addEventListener('error', () => reject(new Error('Matter.js failed to load.')), { once: true });
-    });
-  }
-
-  return new Promise<MatterApi>((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = MATTER_CDN;
-    script.async = true;
-    script.onload = () => {
-      const matter = getMatter();
-      if (matter) resolve(matter);
-      else reject(new Error('Matter.js script loaded without exposing window.Matter.'));
-    };
-    script.onerror = () => reject(new Error('Matter.js failed to load.'));
-    document.head.appendChild(script);
-  });
-}
+const MatterRuntime = MatterLib as unknown as MatterApi;
 
 function accentClass(accent: Accent) {
   return `accent-${accent}`;
@@ -543,13 +458,130 @@ function createBounds(Matter: MatterApi, width: number, height: number) {
 }
 
 function getSuggestionTarget(suggestion: string): OpenTarget {
-  if (suggestion.toLowerCase().includes('resume') || suggestion.includes('简历')) return 'resume';
-  if (suggestion.includes('Wrist')) return 'wrist';
-  if (suggestion.includes('AQUARA')) return 'aquara';
-  if (suggestion.includes('DROPLET')) return 'droplet';
-  if (suggestion.includes('Outdoor') || suggestion.includes('Cookware')) return 'cookware';
-  if (suggestion.includes('Industrial') || suggestion.includes('UX') || suggestion.includes('AI')) return 'contact';
+  const normalizedSuggestion = suggestion.toLowerCase();
+  const matchedProject = PROJECT_SUGGESTIONS.find(item =>
+    item.label.toLowerCase() === normalizedSuggestion || item.target === normalizedSuggestion,
+  );
+  if (matchedProject) return matchedProject.target;
+  if (normalizedSuggestion.includes('wrist') || normalizedSuggestion.includes('rehab')) return 'wrist';
+  if (normalizedSuggestion.includes('aquara') || normalizedSuggestion.includes('aquarium')) return 'aquara';
+  if (normalizedSuggestion.includes('droplet') || normalizedSuggestion.includes('pet')) return 'droplet';
+  if (normalizedSuggestion.includes('outdoor') || normalizedSuggestion.includes('cookware')) return 'cookware';
+  if (normalizedSuggestion.includes('industrial') || normalizedSuggestion.includes('ux') || normalizedSuggestion.includes('ai')) return 'contact';
   return 'projects';
+}
+
+function normalizeSearchText(value: string) {
+  return value
+    .normalize('NFKC')
+    .toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '');
+}
+
+function collectSearchStrings(value: unknown, output: string[] = []) {
+  if (typeof value === 'string') {
+    output.push(value);
+  } else if (Array.isArray(value)) {
+    value.forEach(item => collectSearchStrings(item, output));
+  } else if (value && typeof value === 'object') {
+    Object.values(value).forEach(item => collectSearchStrings(item, output));
+  }
+  return output;
+}
+
+function isSubsequence(query: string, text: string) {
+  let queryIndex = 0;
+  for (const character of text) {
+    if (character === query[queryIndex]) queryIndex += 1;
+    if (queryIndex === query.length) return true;
+  }
+  return false;
+}
+
+function levenshteinWithin(query: string, text: string, limit: number) {
+  if (Math.abs(query.length - text.length) > limit) return limit + 1;
+
+  let previous = Array.from({ length: text.length + 1 }, (_, index) => index);
+  for (let row = 1; row <= query.length; row += 1) {
+    const current = [row];
+    let rowMinimum = current[0];
+
+    for (let column = 1; column <= text.length; column += 1) {
+      const cost = query[row - 1] === text[column - 1] ? 0 : 1;
+      const value = Math.min(
+        current[column - 1] + 1,
+        previous[column] + 1,
+        previous[column - 1] + cost,
+      );
+      current[column] = value;
+      rowMinimum = Math.min(rowMinimum, value);
+    }
+
+    if (rowMinimum > limit) return limit + 1;
+    previous = current;
+  }
+
+  return previous[text.length];
+}
+
+function fuzzyTermScore(query: string, term: string) {
+  const normalizedQuery = normalizeSearchText(query);
+  const normalizedTerm = normalizeSearchText(term);
+  if (!normalizedQuery || !normalizedTerm || normalizedQuery.length < 2) return 0;
+  if (normalizedTerm.includes(normalizedQuery)) return 100;
+  if (normalizedQuery.length >= 3 && isSubsequence(normalizedQuery, normalizedTerm)) return 78;
+  if (normalizedQuery.length < 3) return 0;
+
+  const limit = normalizedQuery.length <= 4 ? 1 : Math.min(2, Math.floor(normalizedQuery.length * 0.25));
+  const minLength = Math.max(1, normalizedQuery.length - limit);
+  const maxLength = normalizedQuery.length + limit;
+  let bestScore = 0;
+
+  for (let length = minLength; length <= maxLength; length += 1) {
+    for (let start = 0; start + length <= normalizedTerm.length; start += 1) {
+      const distance = levenshteinWithin(
+        normalizedQuery,
+        normalizedTerm.slice(start, start + length),
+        limit,
+      );
+      if (distance <= limit) bestScore = Math.max(bestScore, 68 - distance * 12);
+    }
+  }
+
+  return bestScore;
+}
+
+function getSearchTerms(project: Project, language: Language) {
+  const localized = localizeProject(project, language);
+  return [
+    ...collectSearchStrings(project),
+    ...collectSearchStrings(localized),
+    ...(PROJECT_SEARCH_ALIASES[project.id] ?? []),
+  ];
+}
+
+function getSearchTarget(query: string, language: Language): OpenTarget {
+  const needle = normalizeSearchText(query);
+  if (!needle) return 'projects';
+
+  const personalMatch = PERSONAL_SEARCH_ALIASES.find(({ terms }) =>
+    terms.some(term => fuzzyTermScore(query, term) >= FUZZY_MATCH_THRESHOLD),
+  );
+  if (personalMatch) return personalMatch.target;
+
+  const matchedProject = projects
+    .map(project => ({ project, score: Math.max(...getSearchTerms(project, language).map(term => fuzzyTermScore(query, term))) }))
+    .sort((a, b) => b.score - a.score)
+    .find(item => item.score >= FUZZY_MATCH_THRESHOLD)?.project;
+
+  const slideMatch = portfolioContent.slides.find(slide => {
+    if (slide.kind === 'contact' || !projects.some(project => project.id === slide.id)) return false;
+    return collectSearchStrings(slide).some(term => fuzzyTermScore(query, term) >= FUZZY_MATCH_THRESHOLD);
+  });
+
+  if (matchedProject) return matchedProject.id;
+  if (slideMatch && slideMatch.id in PROJECT_SEARCH_ALIASES) return slideMatch.id as ProjectId;
+  return getSuggestionTarget(query);
 }
 
 function isFixedControlTarget(target: EventTarget | null) {
@@ -557,15 +589,20 @@ function isFixedControlTarget(target: EventTarget | null) {
   return Boolean(element?.closest(
     [
       '.gravity-control',
-      '.antigravity-close',
+      '.antigravity-home-button',
       '.detail-back',
       '.antigravity-nav',
       '.antigravity-topline',
+      '.antigravity-search',
+      '.antigravity-suggestions',
+      '.antigravity-actions',
       '.antigravity-skill-tags',
       '.project-tabs',
       '.gallery-row',
       '.project-bottom-row',
       '.media-overlay',
+      '.embedded-demo-overlay',
+      '.model-preview-overlay',
       '.contact-link-grid',
       '.contact-resume-card',
       '.resume-open-link',
@@ -585,7 +622,320 @@ function getProjectMedia(project: Project): GalleryItem[] {
   ];
 }
 
-export default function AntigravityPlayground({ onClose }: { onClose: () => void }) {
+export function LegacyParticlePortfolioTitle({ onOpen }: { onOpen: () => void }) {
+  const titleRootRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pointerRef = useRef({ x: 0, y: 0, active: false, influence: 0 });
+
+  useEffect(() => {
+    const root = titleRootRef.current;
+    const canvas = canvasRef.current;
+    if (!root || !canvas) return undefined;
+
+    const context = canvas.getContext('2d', { alpha: true });
+    const sampleCanvas = document.createElement('canvas');
+    const sampleContext = sampleCanvas.getContext('2d', { willReadFrequently: true });
+    if (!context || !sampleContext) return undefined;
+
+    type Particle = {
+      x: number;
+      y: number;
+      homeX: number;
+      homeY: number;
+      vx: number;
+      vy: number;
+      size: number;
+      phase: number;
+      alpha: number;
+    };
+    let particles: Particle[] = [];
+    let haloParticles: Particle[] = [];
+    let frame = 0;
+    let disposed = false;
+    let width = 1;
+    let height = 1;
+    let pixelRatio = 1;
+    let lastTime = performance.now();
+
+    const rebuildText = () => {
+      if (disposed) return;
+      const rect = root.getBoundingClientRect();
+      width = Math.max(1, Math.round(rect.width));
+      height = Math.max(1, Math.round(rect.height));
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      context.clearRect(0, 0, width, height);
+
+      sampleCanvas.width = width;
+      sampleCanvas.height = height;
+      sampleContext.clearRect(0, 0, width, height);
+      const title = root.querySelector<HTMLElement>('.antigravity-logo strong');
+      const titleStyle = title ? getComputedStyle(title) : null;
+      const fontSize = titleStyle ? Number.parseFloat(titleStyle.fontSize) : Math.min(184, Math.max(54, width * 0.16));
+      const fontWeight = titleStyle?.fontWeight ?? '900';
+      const fontFamily = titleStyle?.fontFamily ?? 'Rajdhani, Arial Narrow, system-ui, sans-serif';
+      sampleContext.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+      sampleContext.textAlign = 'center';
+      sampleContext.textBaseline = 'middle';
+      sampleContext.fillStyle = '#101518';
+      sampleContext.fillText('Portfolio', width / 2, height / 2 + fontSize * 0.04);
+
+      const pixels = sampleContext.getImageData(0, 0, width, height).data;
+      const particleSize = 2;
+      const columns = Math.ceil(width / particleSize);
+      const cells = new Map<number, { x: number; y: number }>();
+      const occupied = new Set<string>();
+
+      // Register every grid cell touched by the glyph. Rendering one square
+      // per cell keeps the interior perfectly tiled; the mask below trims the
+      // outer cells back to the actual letter silhouette.
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          if (pixels[(y * width + x) * 4 + 3] <= 12) continue;
+          const cellX = Math.floor(x / particleSize) * particleSize;
+          const cellY = Math.floor(y / particleSize) * particleSize;
+          const key = (cellY / particleSize) * columns + cellX / particleSize;
+          if (!cells.has(key)) {
+            cells.set(key, { x: cellX, y: cellY });
+            occupied.add(`${cellX}:${cellY}`);
+          }
+        }
+      }
+
+      particles = Array.from(cells.values()).map((point, index) => ({
+        x: point.x,
+        y: point.y,
+        homeX: point.x,
+        homeY: point.y,
+        vx: 0,
+        vy: 0,
+        size: particleSize,
+        phase: index * 0.37,
+        alpha: 1,
+      }));
+
+      // Add one restrained ring of round particles around the silhouette.
+      // These soften the square grid without changing the clean tiled core.
+      const haloCells = new Map<string, { x: number; y: number }>();
+      const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+      for (const point of cells.values()) {
+        for (const [dx, dy] of directions) {
+          const haloX = point.x + dx * particleSize;
+          const haloY = point.y + dy * particleSize;
+          if (occupied.has(`${haloX}:${haloY}`)) continue;
+          haloCells.set(`${haloX}:${haloY}`, {
+            x: haloX + particleSize / 2,
+            y: haloY + particleSize / 2,
+          });
+        }
+      }
+      haloParticles = Array.from(haloCells.values()).map((point, index) => ({
+        x: point.x,
+        y: point.y,
+        homeX: point.x,
+        homeY: point.y,
+        vx: 0,
+        vy: 0,
+        size: particleSize * 1.35,
+        phase: index * 0.23,
+        alpha: 0.24,
+      }));
+      root.dataset.particleCount = String(particles.length + haloParticles.length);
+      root.dataset.particleFallback = particles.length === 0 ? 'true' : 'false';
+    };
+
+    const render = (time: number) => {
+      if (disposed) return;
+      const delta = Math.min(1.45, Math.max(0.7, (time - lastTime) / 16.67));
+      lastTime = time;
+      const pointer = pointerRef.current;
+      const repelRadius = width < 620 ? 40 : 52;
+      const repelStrength = width < 620 ? 3.5 : 4;
+      const haloDisplacement = width < 620 ? 1.1 : 1.5;
+      const targetInfluence = pointer.active ? 1 : 0;
+      pointer.influence += (targetInfluence - pointer.influence) * Math.min(1, 0.12 * delta);
+      const influence = pointer.influence;
+      const isResting = influence < 0.002;
+
+      const updateParticle = (particle: Particle, displacementLimit: number) => {
+        if (isResting) {
+          particle.x = particle.homeX;
+          particle.y = particle.homeY;
+          particle.vx = 0;
+          particle.vy = 0;
+          return;
+        }
+
+        particle.vx += (particle.homeX - particle.x) * 0.026 * delta;
+        particle.vy += (particle.homeY - particle.y) * 0.026 * delta;
+        const awayX = particle.x - pointer.x;
+        const awayY = particle.y - pointer.y;
+        const distanceSq = awayX * awayX + awayY * awayY;
+        if (distanceSq > 0.1 && distanceSq < repelRadius * repelRadius) {
+          const distance = Math.sqrt(distanceSq);
+          const force = repelStrength * influence * (1 - distance / repelRadius);
+          particle.vx += (awayX / distance) * force * 0.03 * delta;
+          particle.vy += (awayY / distance) * force * 0.03 * delta;
+        }
+
+        particle.vx *= 0.84;
+        particle.vy *= 0.84;
+        particle.x += particle.vx * delta;
+        particle.y += particle.vy * delta;
+        particle.x = Math.max(particle.homeX - displacementLimit, Math.min(particle.homeX + displacementLimit, particle.x));
+        particle.y = Math.max(particle.homeY - displacementLimit, Math.min(particle.homeY + displacementLimit, particle.y));
+      };
+
+      context.globalCompositeOperation = 'source-over';
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = '#101518';
+      for (const particle of particles) {
+        // Keep the tiled wordmark fixed. Only the outer halo responds to the
+        // pointer, so the readable title can never be erased by a gap.
+        particle.x = particle.homeX;
+        particle.y = particle.homeY;
+        particle.vx = 0;
+        particle.vy = 0;
+        context.globalAlpha = particle.alpha;
+        context.fillRect(particle.x, particle.y, particle.size + 0.42, particle.size + 0.42);
+      }
+
+      // Keep the original glyph mask in every state so interaction can never
+      // erase the wordmark or expose a hard square edge.
+      context.globalCompositeOperation = 'destination-in';
+      context.drawImage(sampleCanvas, 0, 0, width, height);
+      context.globalCompositeOperation = 'source-over';
+      context.globalAlpha = 1;
+      context.fillStyle = '#101518';
+      for (const particle of haloParticles) {
+        updateParticle(particle, haloDisplacement);
+        context.globalAlpha = particle.alpha;
+        context.beginPath();
+        context.arc(particle.x, particle.y, particle.size / 2, 0, Math.PI * 2);
+        context.fill();
+      }
+      context.globalAlpha = 1;
+      frame = requestAnimationFrame(render);
+    };
+
+    const observer = new ResizeObserver(rebuildText);
+    observer.observe(root);
+    rebuildText();
+    void document.fonts?.ready.then(rebuildText);
+    frame = requestAnimationFrame(render);
+
+    return () => {
+      disposed = true;
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={titleRootRef}
+      className="antigravity-logo-fluid antigravity-particle-title"
+      onPointerMove={event => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        pointerRef.current.x = event.clientX - rect.left;
+        pointerRef.current.y = event.clientY - rect.top;
+        pointerRef.current.active = true;
+      }}
+      onPointerLeave={() => {
+        pointerRef.current.active = false;
+      }}
+    >
+      <canvas ref={canvasRef} className="portfolio-particle-canvas" aria-hidden="true" />
+      <button className="antigravity-logo" type="button" data-antigravity-body data-open-target="contact" onClick={onOpen}>
+        <strong>Portfolio</strong>
+      </button>
+    </div>
+  );
+}
+
+function ClearPortfolioTitle({ onOpen }: { onOpen: () => void }) {
+  return (
+    <div className="antigravity-logo-fluid">
+      <button className="antigravity-logo" type="button" data-antigravity-body data-open-target="contact" onClick={onOpen}>
+        <strong>Portfolio</strong>
+      </button>
+    </div>
+  );
+}
+
+export function OrbitalBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return undefined;
+    const context = canvas.getContext('2d');
+    if (!context) return undefined;
+
+    let width = 1;
+    let height = 1;
+    let pixelRatio = 1;
+    let frame = 0;
+
+    const resize = () => {
+      width = Math.max(1, window.innerWidth);
+      height = Math.max(1, window.innerHeight);
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    };
+
+    const draw = (time: number) => {
+      const t = time * 0.0001;
+      const radius = Math.hypot(width, height) / 2;
+      const flow = Math.sin(t * 1.6) * 0.5 + 0.5;
+
+      context.fillStyle = 'rgba(244, 247, 246, 0.16)';
+      context.fillRect(0, 0, width, height);
+      context.lineCap = 'round';
+
+      for (let i = -20; i < 0; i += 1) {
+        for (let j = 14; j > 0; j -= 1) {
+          const u = (i + (j % 2) / 2) * 0.777 + t;
+          const orbit = Math.exp(u) * radius;
+          const angle = j * 0.449 + flow * 9;
+          const centerX = width / 2 + orbit * Math.cos(angle);
+          const centerY = height / 2 + orbit * Math.sin(angle);
+          const opacity = Math.min(0.12, 0.025 + orbit / radius * 0.06);
+
+          context.strokeStyle = j % 5 === 0
+            ? `rgba(25, 184, 149, ${opacity})`
+            : `rgba(17, 23, 26, ${opacity})`;
+          context.lineWidth = Math.min(4.5, Math.max(0.45, orbit / 44));
+          context.beginPath();
+          context.arc(centerX, centerY, orbit * 0.36, 0, Math.PI * 2);
+          context.stroke();
+        }
+      }
+
+      frame = requestAnimationFrame(draw);
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+    frame = requestAnimationFrame(draw);
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="antigravity-orbital-background" aria-hidden="true" />;
+}
+
+export default function AntigravityPlayground() {
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const homeRef = useRef<HTMLElement>(null);
@@ -593,10 +943,11 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
   const contactRef = useRef<HTMLElement>(null);
   const pointerRef = useRef({ x: 0, y: 0, target: null as HTMLElement | null, moved: false });
   const suppressClickRef = useRef(false);
-  const [query, setQuery] = useState(SEARCH_SUGGESTIONS[0]);
+  const [query, setQuery] = useState('');
   const [suggestionIndex, setSuggestionIndex] = useState(0);
   const [gravityEnabled, setGravityEnabled] = useState(true);
-  const [resetKey, setResetKey] = useState(0);
+  const [language, setLanguage] = useState<Language>('en');
+  const [navOpen, setNavOpen] = useState(false);
   const [activeProjectId, setActiveProjectId] = useState<ProjectId | null>(null);
   const [pendingScroll, setPendingScroll] = useState<SectionId | null>(null);
   const [activeTabs, setActiveTabs] = useState<Record<ProjectId, ProjectTabKey>>({
@@ -613,10 +964,14 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
   const activeProjectIdRef = useRef(activeProjectId);
   const activeMediaRef = useRef(activeMedia);
   const resumeOpenRef = useRef(resumeOpen);
-  const activeSuggestion = SEARCH_SUGGESTIONS[suggestionIndex];
+  const activeSuggestion = PROJECT_SUGGESTIONS[suggestionIndex % PROJECT_SUGGESTIONS.length];
+  const copy = UI_COPY[language];
+  const activeSuggestionLabel = language === 'zh'
+    ? localizeProject(projects.find(project => project.id === activeSuggestion.target) ?? projects[0], language).title
+    : activeSuggestion.label;
   const activeProject = useMemo(
-    () => projects.find(project => project.id === activeProjectId) ?? projects[0],
-    [activeProjectId],
+    () => localizeProject(projects.find(project => project.id === activeProjectId) ?? projects[0], language),
+    [activeProjectId, language],
   );
 
   useEffect(() => {
@@ -637,7 +992,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setSuggestionIndex(index => (index + 1) % SEARCH_SUGGESTIONS.length);
+      setSuggestionIndex(index => (index + 1) % PROJECT_SUGGESTIONS.length);
     }, 2400);
 
     return () => window.clearInterval(timer);
@@ -669,10 +1024,9 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     if (contactRef.current) observer.observe(contactRef.current);
 
     return () => observer.disconnect();
-  }, [resetKey]);
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
     let raf = 0;
     let resizeTimer = 0;
     let engine: MatterEngine | null = null;
@@ -819,15 +1173,8 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
       raf = requestAnimationFrame(animate);
     };
 
-    void loadMatter()
-      .then(Matter => {
-        if (cancelled) return;
-        MatterRef = Matter;
-        buildWorld(Matter);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    MatterRef = MatterRuntime;
+    buildWorld(MatterRuntime);
 
     const handleResize = () => {
       if (!MatterRef) return;
@@ -838,11 +1185,10 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     window.addEventListener('resize', handleResize);
 
     return () => {
-      cancelled = true;
       window.removeEventListener('resize', handleResize);
       cleanupWorld();
     };
-  }, [activeMedia, activeProjectId, gravityEnabled, resetKey]);
+  }, [activeMedia, activeProjectId, gravityEnabled]);
 
   const scrollTo = useCallback((section: SectionId) => {
     const root = rootRef.current;
@@ -949,7 +1295,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     }
 
     if (target === 'search') {
-      openTarget(getSuggestionTarget(query));
+      openTarget(getSearchTarget(query || activeSuggestion.label, language));
       return;
     }
 
@@ -968,14 +1314,9 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
     setGravityEnabled(true);
   };
 
-  const applySuggestion = (value: string) => {
-    setQuery(value);
-    inputRef.current?.focus();
-  };
-
   const activateSuggestion = (value: string) => {
     setQuery(value);
-    openTarget(getSuggestionTarget(value));
+    openTarget(getSearchTarget(value, language));
   };
 
   const setProjectTab = (projectId: ProjectId, tab: ProjectTabKey) => {
@@ -1055,7 +1396,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
   return (
     <div
       ref={rootRef}
-      className={`antigravity-playground ${gravityEnabled ? 'is-gravity-on' : 'is-zero-g'} ${activeProjectId || resumeOpen ? 'has-project-open' : ''}`}
+      className={`antigravity-playground ${gravityEnabled ? 'is-gravity-on' : 'is-zero-g'} ${language === 'zh' ? 'is-lang-zh' : ''} ${activeProjectId || resumeOpen ? 'has-project-open' : ''}`}
       data-no-page-swipe="true"
       onPointerDownCapture={handlePointerDownCapture}
       onPointerMoveCapture={handlePointerMoveCapture}
@@ -1070,10 +1411,33 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
           <span>PF</span>
           <strong>AIGC Portfolio</strong>
         </button>
-        <nav className="antigravity-nav" aria-label="Portfolio navigation">
-          <button type="button" onClick={() => openTarget('home')}>Home</button>
-          <button type="button" onClick={() => openTarget('projects')}>Works</button>
-          <button type="button" onClick={() => openTarget('contact')}>Contact</button>
+        <nav className={`antigravity-nav ${navOpen ? 'is-open' : ''}`} aria-label="Portfolio navigation">
+          <button
+            className="nav-collapse-toggle"
+            type="button"
+            aria-expanded={navOpen}
+            aria-controls="portfolio-nav-links"
+            aria-label={language === 'zh' ? '展开导航' : 'Open navigation'}
+            onClick={() => setNavOpen(open => !open)}
+          >
+            <Menu size={16} />
+            <span>{language === 'zh' ? '导航' : 'MENU'}</span>
+            <ChevronDown size={14} />
+          </button>
+          <div className="nav-link-panel" id="portfolio-nav-links">
+            <button type="button" onClick={() => { setNavOpen(false); openTarget('home'); }}>{copy.home}</button>
+            <button type="button" onClick={() => { setNavOpen(false); openTarget('projects'); }}>{copy.works}</button>
+            <button type="button" onClick={() => { setNavOpen(false); openTarget('contact'); }}>{copy.contact}</button>
+            <button
+              className="language-toggle"
+              type="button"
+              aria-pressed={language === 'zh'}
+              aria-label={copy.languageLabel}
+              onClick={() => { setNavOpen(false); setLanguage(current => current === 'en' ? 'zh' : 'en'); }}
+            >
+              {copy.languageButton}
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -1085,24 +1449,26 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
           onClick={() => setGravityEnabled(enabled => !enabled)}
         >
           <span>
-            <small>GRAVITY</small>
-            <strong>{gravityEnabled ? 'ON' : 'OFF'}</strong>
+            <small>{copy.gravity}</small>
+            <strong>{gravityEnabled ? copy.on : copy.off}</strong>
           </span>
           <i aria-hidden="true" />
         </button>
       </div>
 
-      <button className="antigravity-close" type="button" onClick={onClose} aria-label="Close portfolio playground">
-        <X size={18} />
+      <button
+        className={`antigravity-home-button ${activeProjectId ? 'is-project-back-button' : ''}`}
+        type="button"
+        onClick={() => openTarget(activeProjectId ? 'projects' : 'home')}
+        aria-label={activeProjectId ? copy.back : copy.home}
+      >
+        {activeProjectId ? <ArrowLeft size={17} strokeWidth={1.8} /> : <House size={17} strokeWidth={1.8} />}
       </button>
 
       <main className="antigravity-scroll">
         <section className="antigravity-section antigravity-home" id="gravity-home" ref={homeRef}>
           <div className="antigravity-section-inner antigravity-hero">
-            <button className="antigravity-logo" type="button" data-antigravity-body data-open-target="contact">
-              <span>Andre Sun</span>
-              <strong>Portfolio</strong>
-            </button>
+            <ClearPortfolioTitle onOpen={() => openTarget('contact')} />
 
             <form
               className="antigravity-search"
@@ -1110,69 +1476,40 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
               data-open-target="search"
               onSubmit={event => {
                 event.preventDefault();
-                openTarget(getSuggestionTarget(query));
+                openTarget(query.trim() ? getSearchTarget(query, language) : activeSuggestion.target);
               }}
-              aria-label="Portfolio search"
+              aria-label={copy.search}
             >
-              <Search size={19} />
+              <button className="antigravity-search-submit" type="submit" aria-label={`Open ${activeSuggestionLabel}`}>
+                <Search size={19} />
+              </button>
               <input
                 ref={inputRef}
                 value={query}
                 onChange={event => setQuery(event.target.value)}
-                aria-label="Search portfolio"
+                placeholder={activeSuggestionLabel}
+                aria-label={copy.search}
               />
-              <MousePointer2 size={18} />
             </form>
 
             <section className="antigravity-suggestions" aria-label="Search recommendations">
-              <span>TRY</span>
-              {SEARCH_SUGGESTIONS.map(suggestion => (
+              <span>{copy.try}</span>
+              {PROJECT_SUGGESTIONS.map(suggestion => (
                 <button
-                  key={suggestion}
+                  key={suggestion.target}
                   type="button"
-                  className={suggestion === activeSuggestion ? 'active' : ''}
-                  onClick={() => applySuggestion(suggestion)}
+                  className={suggestion.target === activeSuggestion.target ? 'active' : ''}
+                  onClick={() => activateSuggestion(suggestion.label)}
                   data-antigravity-body
-                  data-open-target={getSuggestionTarget(suggestion)}
+                  data-open-target={suggestion.target}
                 >
-                  {suggestion}
+                  {language === 'zh'
+                    ? localizeProject(projects.find(project => project.id === suggestion.target) ?? projects[0], language).title
+                    : suggestion.label}
                 </button>
               ))}
             </section>
 
-            <section className="antigravity-skill-tags" aria-label="Self and skill shortcuts">
-              {skillTags.map(tag => (
-                <button
-                  key={tag.title}
-                  type="button"
-                  onClick={() => openTarget('contact')}
-                  data-antigravity-body
-                  data-open-target="contact"
-                >
-                  <strong>{tag.title}</strong>
-                  <small>{tag.detail}</small>
-                </button>
-              ))}
-            </section>
-
-            <div className="antigravity-actions" aria-label="Search actions">
-              <button type="button" onClick={() => activateSuggestion(activeSuggestion)} data-antigravity-body data-open-target="search">
-                <Search size={16} />
-                Search
-              </button>
-              <button type="button" onClick={() => openTarget('projects')} data-antigravity-body data-open-target="projects">
-                <ArrowDown size={16} />
-                Works
-              </button>
-              <a href={RESUME_FILE} target="_blank" rel="noreferrer" data-antigravity-body data-open-target="resume">
-                <FileText size={16} />
-                Resume PDF
-              </a>
-              <button type="button" onClick={() => setResetKey(key => key + 1)} data-antigravity-body data-open-target="home">
-                <RotateCcw size={16} />
-                Reset
-              </button>
-            </div>
           </div>
         </section>
 
@@ -1181,32 +1518,42 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
             <div className="antigravity-section-heading">
               <span className="heading-stem" />
               <div>
-                <p>SELECTED WORKS</p>
-                <h2>Works & Resume</h2>
+                <p className="antigravity-english-heading">SELECTED WORKS</p>
+                <h2 className="antigravity-cjk-heading antigravity-english-heading">Works &amp; Resume</h2>
               </div>
             </div>
 
-            <div className="antigravity-card-cloud" aria-label="Project and resume cards">
-              {projects.map((project, index) => (
-                <button
-                  key={project.id}
-                  className={`antigravity-result-card project-work-card ${accentClass(project.accent)}`}
-                  type="button"
-                  onClick={() => {
-                    if (gravityEnabled) openTarget(project.id);
-                  }}
-                  data-antigravity-body
-                  data-open-target={project.id}
-                >
-                  <span className="result-index">{String(index + 1).padStart(2, '0')}</span>
-                  <img src={project.cover} alt={`${project.title} preview`} draggable={false} />
-                  <span className="result-copy">
-                    <strong>{project.title}</strong>
-                    <small>{project.subtitle}</small>
-                    {project.id === 'droplet' && <em>Red Dot Award: Design Concept Winner 2026</em>}
-                  </span>
-                </button>
-              ))}
+            <div className="antigravity-card-cloud" aria-label={language === 'zh' ? '项目与简历卡片' : 'Project and resume cards'}>
+              {projects.map((project, index) => {
+                const displayProject = localizeProject(project, language);
+                return (
+                  <button
+                    key={project.id}
+                    className={`antigravity-result-card project-work-card project-work-card--${project.id} ${accentClass(project.accent)}`}
+                    type="button"
+                    onClick={() => {
+                      if (gravityEnabled) openTarget(project.id);
+                    }}
+                    data-antigravity-body
+                    data-open-target={project.id}
+                  >
+                    <span className="result-index">{String(index + 1).padStart(2, '0')}</span>
+                    <img src={PROJECT_CARD_COVERS[project.id] ?? project.cover} alt={`${displayProject.title} preview`} draggable={false} />
+                    <span className="result-copy">
+                      <strong className="antigravity-cjk-heading">{displayProject.title}</strong>
+                      <small>{displayProject.subtitle}</small>
+                    </span>
+                    {project.id === 'droplet' && (
+                      <img
+                        className="red-dot-card-mark"
+                        src="./red-dot-mark-2026.png"
+                        alt="Red Dot Design Concept Award 2026"
+                        draggable={false}
+                      />
+                    )}
+                  </button>
+                );
+              })}
 
               {/* Removed redundant PDF resume button from works stack as requested */}
             </div>
@@ -1218,20 +1565,24 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
             <div className="antigravity-section-heading">
               <span className="heading-stem" />
               <div>
-                <p>CONTACT</p>
-                <h2>Sun Qisheng</h2>
+                <p>{language === 'zh' ? '联系' : 'CONTACT'}</p>
+                <h2 className="antigravity-cjk-heading">{language === 'zh' ? '孙启圣' : 'Sun Qisheng'}</h2>
               </div>
             </div>
 
             <section className="antigravity-detail contact-page contact-page-long">
               <article className="contact-profile" data-antigravity-body data-open-target="resume">
-                <span>Product & Experience Design</span>
-                <h3>孙启圣</h3>
-                <p>Industrial design graduate student focused on product systems, UX prototypes, AI-assisted visual workflows, and portfolio-ready interaction demos.</p>
-                <p className="contact-award-note">DROPLET received the Red Dot Award: Design Concept Winner 2026.</p>
+                <span>{language === 'zh' ? '产品与体验设计' : 'Product & Experience Design'}</span>
+                <h3 className="antigravity-cjk-heading">孙启圣</h3>
+                <p>{language === 'zh'
+                  ? '专注于产品系统、UX 原型、AI 辅助视觉流程与可展示交互 Demo 的工业设计研究生。'
+                  : 'Industrial design graduate student focused on product systems, UX prototypes, AI-assisted visual workflows, and portfolio-ready interaction demos.'}</p>
+                <p className="contact-award-note">{language === 'zh'
+                  ? 'DROPLET 获得 Red Dot Award: Design Concept Winner 2026。'
+                  : 'DROPLET received the Red Dot Award: Design Concept Winner 2026.'}</p>
                 <div className="contact-chip-row">
                   <strong className="is-award-chip">Red Dot 2026</strong>
-                  {skillTags.map(tag => <strong key={tag.title}>{tag.title}</strong>)}
+                  {skillTags.map(tag => <strong key={tag.title}>{language === 'zh' ? SKILL_TAG_ZH[tag.title] ?? tag.title : tag.title}</strong>)}
                 </div>
               </article>
 
@@ -1285,7 +1636,7 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
                 </div>
                 <a className="resume-open-link" href={RESUME_FILE} target="_blank" rel="noreferrer">
                   <FileText size={17} />
-                  Open Resume PDF
+                  {copy.openResume}
                 </a>
               </div>
 
@@ -1313,47 +1664,24 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
         </section>
       </main>
 
-      <footer className="antigravity-footer">
-        <button 
-          type="button" 
-          className={activeSection === 'home' ? 'active' : ''} 
-          onClick={() => { openTarget('home'); setActiveSection('home'); }}
-        >
-          Home
-        </button>
-        <button 
-          type="button" 
-          className={activeSection === 'projects' ? 'active' : ''} 
-          onClick={() => { openTarget('projects'); setActiveSection('projects'); }}
-        >
-          Works
-        </button>
-        <button 
-          type="button" 
-          className={activeSection === 'contact' ? 'active' : ''} 
-          onClick={() => { openTarget('contact'); setActiveSection('contact'); }}
-        >
-          Contact
-        </button>
-      </footer>
-
       {activeProjectId && (
         <ProjectDetail
           project={activeProject}
+          language={language}
           activeTab={activeTabs[activeProject.id] ?? 'overview'}
           onTabChange={tab => setProjectTab(activeProject.id, tab)}
-          onClose={() => setActiveProjectId(null)}
           onOpenMedia={index => setActiveMedia({ projectId: activeProject.id, index })}
         />
       )}
 
       {resumeOpen && (
-        <ResumeDetail onClose={() => setResumeOpen(false)} />
+        <ResumeDetail />
       )}
 
       {activeMedia && (
         <MediaOverlay
           mediaState={activeMedia}
+          language={language}
           onClose={() => setActiveMedia(null)}
           onPrev={() => {
             setActiveMedia(current => current ? { ...current, index: Math.max(0, current.index - 1) } : current);
@@ -1373,27 +1701,39 @@ export default function AntigravityPlayground({ onClose }: { onClose: () => void
 
 function ProjectDetail({
   project,
+  language,
   activeTab,
   onTabChange,
-  onClose,
   onOpenMedia,
 }: {
   project: Project;
+  language: Language;
   activeTab: ProjectTabKey;
   onTabChange: (tab: ProjectTabKey) => void;
-  onClose: () => void;
   onOpenMedia: (index: number) => void;
 }) {
+  const copy = UI_COPY[language];
   const media = getProjectMedia(project);
   const currentTab = project.tabs.find(tab => tab.id === activeTab) ?? project.tabs[0];
+  const [demoOpen, setDemoOpen] = useState(false);
+  const [modelsOpen, setModelsOpen] = useState(false);
+  const [modelInteracting, setModelInteracting] = useState(false);
+  const modelPreview = MODEL_ASSET_PREVIEWS[project.id];
+
+  useEffect(() => {
+    if (!modelsOpen) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setModelsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [modelsOpen]);
 
   return (
     <section className={`antigravity-detail-overlay ${accentClass(project.accent)}`}>
-      <button className="detail-back" type="button" onClick={onClose}>
-        <ArrowLeft size={17} />
-        Back
-      </button>
-
       <div className="antigravity-project-detail">
         <div className="project-layout deck-grid">
           <div className="project-meta">
@@ -1404,36 +1744,36 @@ function ProjectDetail({
               </div>
               <div className="project-range">{project.range}</div>
             </div>
-            <h2>{project.title}</h2>
-            <h3>{project.subtitle}</h3>
+            <h2 className="antigravity-cjk-heading">{project.title}</h2>
+            <h3 className="antigravity-cjk-heading">{project.subtitle}</h3>
             <p className="project-summary">{project.summary}</p>
 
             <div className="project-proof-grid">
               <div>
-                <span>Role</span>
+                <span>{copy.role}</span>
                 <strong>{project.role}</strong>
               </div>
               <div>
-                <span>Problem</span>
+                <span>{copy.problem}</span>
                 <strong>{project.problem}</strong>
               </div>
               <div>
-                <span>Output</span>
+                <span>{copy.output}</span>
                 <strong>{project.output}</strong>
               </div>
               <div>
-                <span>Tools</span>
+                <span>{copy.tools}</span>
                 <strong>{project.tools}</strong>
               </div>
             </div>
           </div>
 
-          <div className="project-visual-card">
+          <div className={`project-visual-card project-visual-card--${project.id}`}>
             <div className="visual-header">
               <span>{project.title}</span>
               <span>{project.tags.slice(0, 3).join(' / ')}</span>
             </div>
-            <div className="project-tabs" role="tablist" aria-label={`${project.title} sections`}>
+            <div className="project-tabs" role="tablist" aria-label={`${project.title} ${copy.sections}`}>
               {project.tabs.map(tab => (
                 <button
                   key={tab.id}
@@ -1457,7 +1797,7 @@ function ProjectDetail({
                 <img src={project.cover} alt={project.title} draggable={false} />
                 <span className="media-zoom">
                   <ZoomIn size={17} />
-                  OPEN IMAGE
+                  {copy.openImage}
                 </span>
               </button>
 
@@ -1494,6 +1834,17 @@ function ProjectDetail({
             </div>
 
             <div className="project-bottom-row">
+              {project.demoUrl && (
+                <button
+                  className="play-demo playable-demo"
+                  type="button"
+                  onClick={() => setDemoOpen(true)}
+                  data-no-page-swipe="true"
+                >
+                  <ExternalLink size={17} />
+                  {copy.playableDemo}
+                </button>
+              )}
               {project.gallery.some(item => item.type === 'video') && (
                 <button
                   className="play-demo"
@@ -1504,33 +1855,118 @@ function ProjectDetail({
                   }}
                 >
                   <Play size={17} />
-                  PLAY DEMO VIDEO
+                  {copy.playVideo}
+                </button>
+              )}
+              {modelPreview && (
+                <button
+                  className="model-preview-trigger model-preview-entry"
+                  type="button"
+                  onClick={() => setModelsOpen(true)}
+                  data-no-page-swipe="true"
+                >
+                  <span className="model-preview-entry-icon" aria-hidden="true"><Box size={21} /></span>
+                  <span className="model-preview-entry-copy">
+                    <small>INTERACTIVE 3D</small>
+                    <strong>{language === 'zh' ? '旋转查看 · 结构动画' : 'Rotate · Explore · Animate'}</strong>
+                    <em>{language === 'zh' ? '进入模型查看器' : 'Open model viewer'}</em>
+                  </span>
+                  <ExternalLink className="model-preview-entry-arrow" size={16} aria-hidden="true" />
                 </button>
               )}
               <div className="ai-role">
-                <span>AI role</span>
+                <span>{copy.aiRole}</span>
                 <p>{project.aiRole}</p>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {demoOpen && project.demoUrl && (
+        <div
+          className="embedded-demo-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${project.title} demo`}
+          data-no-page-swipe="true"
+          onClick={() => setDemoOpen(false)}
+        >
+          <div className="embedded-demo-panel" onClick={event => event.stopPropagation()}>
+            <div className="embedded-demo-header">
+              <span>{project.title} · DEMO</span>
+              <button type="button" onClick={() => setDemoOpen(false)} aria-label={copy.closeMedia}>
+                <X size={18} />
+              </button>
+            </div>
+            <iframe
+              src={project.demoUrl}
+              title={`${project.title} interactive demo`}
+              allow="camera; microphone; fullscreen"
+            />
+          </div>
+        </div>
+      )}
+
+      {modelsOpen && modelPreview && createPortal(
+        <div
+          className="model-preview-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={modelPreview.title}
+          data-no-page-swipe="true"
+          onClick={() => {
+            if (!modelInteracting) setModelsOpen(false);
+          }}
+        >
+          <div className="model-preview-panel" onClick={event => event.stopPropagation()}>
+            <div className="embedded-demo-header">
+              <span>{modelPreview.title}</span>
+              <div className="model-preview-header-meta">
+                <small>{modelPreview.config.size}</small>
+                <button type="button" onClick={() => setModelsOpen(false)} aria-label={copy.closeMedia}>
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <div className="model-preview-body">
+              <Suspense fallback={<div className="model-preview-chunk-loading">Loading 3D viewer…</div>}>
+                <ModelViewer
+                  config={modelPreview.config}
+                  language={language}
+                  active={modelsOpen}
+                  onInteractionChange={setModelInteracting}
+                />
+              </Suspense>
+            </div>
+            <div className="model-preview-note">
+              {language === 'zh'
+                ? modelPreview.config.noteZh ?? modelPreview.config.noteEn
+                : modelPreview.config.noteEn ?? modelPreview.config.noteZh}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </section>
   );
 }
 
 function MediaOverlay({
   mediaState,
+  language,
   onClose,
   onPrev,
   onNext,
 }: {
   mediaState: ActiveMedia;
+  language: Language;
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
 }) {
-  const project = projects.find(item => item.id === mediaState.projectId) ?? projects[0];
+  const copy = UI_COPY[language];
+  const project = localizeProject(projects.find(item => item.id === mediaState.projectId) ?? projects[0], language);
   const media = getProjectMedia(project);
   const item = media[mediaState.index] ?? media[0];
   const hasPrev = mediaState.index > 0;
@@ -1546,13 +1982,13 @@ function MediaOverlay({
             <span>{item.label}</span>
             <small>{item.evidenceType}</small>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close media" data-no-page-swipe="true">
+          <button type="button" onClick={onClose} aria-label={copy.closeMedia} data-no-page-swipe="true">
             <X size={20} />
           </button>
         </div>
 
         <div className="media-stage">
-          <button className="media-step prev" type="button" onClick={onPrev} disabled={!hasPrev} aria-label="Previous media">
+          <button className="media-step prev" type="button" onClick={onPrev} disabled={!hasPrev} aria-label={copy.previousMedia}>
             <ArrowLeft size={22} />
           </button>
           {item.type === 'video' ? (
@@ -1560,7 +1996,7 @@ function MediaOverlay({
           ) : (
             <img src={item.src} alt={item.label} className="media-image" draggable={false} />
           )}
-          <button className="media-step next" type="button" onClick={onNext} disabled={!hasNext} aria-label="Next media">
+          <button className="media-step next" type="button" onClick={onNext} disabled={!hasNext} aria-label={copy.nextMedia}>
             <ArrowRight size={22} />
           </button>
         </div>
@@ -1574,14 +2010,9 @@ function MediaOverlay({
   );
 }
 
-function ResumeDetail({ onClose }: { onClose: () => void }) {
+function ResumeDetail() {
   return (
     <section className="antigravity-detail-overlay accent-teal resume-detail-overlay">
-      <button className="detail-back" type="button" onClick={onClose}>
-        <ArrowLeft size={17} />
-        Back
-      </button>
-
       <div className="antigravity-project-detail is-resume-modal">
         <div className="resume-modal-container">
           {/* Header section */}
@@ -1740,7 +2171,7 @@ function ResumeDetail({ onClose }: { onClose: () => void }) {
                     <span className="project-tag">Red Dot 2026 / ID</span>
                   </div>
                   <p className="project-desc">
-                    户外运动宠物补水产品，研究户外场景下的宠物脱水与携带痛点，推导手持、喂水、电解质补充与饮水回流的结构与闭环体验。
+                    户外运动宠物补水产品，研究户外场景下的宠物脱水与携带痛点，推导手持、喂水、电解质补充与透明水路可视化体验。
                   </p>
                   <p className="project-award-line">Award: Red Dot Award: Design Concept Winner 2026</p>
                   <p className="project-tools">工具链: Sketch / Rhino / KeyShot / Midjourney</p>

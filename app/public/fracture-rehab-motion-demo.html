@@ -1,0 +1,2876 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>腕力复健小屋 · 骨折康复游戏 Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist+Mono:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-sans: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+      --font-pixel: "DotGothic16", "Geist Mono", ui-monospace, monospace;
+      --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+
+      --ink: #21312a;
+      --ink-soft: rgba(33, 49, 42, 0.55);
+      --text: #33463c;
+      --muted: #6d7f74;
+      --subtle: #97a59b;
+
+      --paper: #f7f3e8;
+      --card: #fffdf6;
+      --soft: #efe8d6;
+      --track: #e9e2cd;
+
+      --mint: #18e299;
+      --mint-deep: #0b8a5f;
+      --mint-ink: #0a6b4b;
+      --mint-soft: #c9f7e2;
+      --mint-faint: #e8fbf1;
+      --amber: #d98a12;
+      --amber-deep: #9a6408;
+      --amber-soft: #fbeccd;
+      --coral: #ef6351;
+      --coral-deep: #c23b2a;
+      --coral-soft: #fcdfda;
+      --blue: #4a7fd4;
+      --blue-deep: #2f5aa8;
+      --blue-soft: #e0ebfa;
+
+      --line: 2px solid var(--ink);
+      --shadow: 4px 4px 0 var(--ink);
+      --shadow-sm: 3px 3px 0 var(--ink);
+      --radius: 18px;
+      --radius-sm: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--font-sans);
+      color: var(--ink);
+      background-color: #223028;
+      background-image: radial-gradient(rgba(247, 243, 232, 0.07) 1.5px, transparent 2px);
+      background-size: 26px 26px;
+      letter-spacing: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(100%, 430px);
+      min-height: 100vh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--paper);
+      background-image: radial-gradient(rgba(33, 49, 42, 0.055) 1.2px, transparent 1.6px);
+      background-size: 22px 22px;
+      border-left: var(--line);
+      border-right: var(--line);
+    }
+
+    /* ---------- 顶栏 ---------- */
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 14px 10px;
+      background: rgba(247, 243, 232, 0.94);
+      border-bottom: var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .logo-tile {
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--mint);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .logo-tile svg {
+      display: block;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .mini-action {
+      border: var(--line);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      color: var(--ink);
+      background: var(--card);
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: var(--shadow-sm);
+      transition: transform 80ms ease, box-shadow 80ms ease;
+    }
+
+    .mini-action:active {
+      transform: translate(3px, 3px);
+      box-shadow: 0 0 0 var(--ink);
+    }
+
+    /* ---------- 步骤条 ---------- */
+
+    .stepper {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 12px 14px;
+      background: var(--paper);
+      border-bottom: var(--line);
+    }
+
+    .stepper::before {
+      content: "";
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      top: 50%;
+      border-top: 2px dashed rgba(33, 49, 42, 0.28);
+    }
+
+    .step-pill {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      border: var(--line);
+      border-radius: var(--radius-sm);
+      padding: 6px 4px 7px;
+      color: var(--muted);
+      background: var(--card);
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .step-pill i {
+      font-style: normal;
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      opacity: 0.75;
+    }
+
+    .step-pill.active {
+      color: var(--ink);
+      background: var(--mint);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .step-pill.done {
+      color: var(--mint-ink);
+      background: var(--mint-soft);
+    }
+
+    /* ---------- 屏幕与面板 ---------- */
+
+    .screen {
+      display: none;
+      flex: 1;
+      padding: 16px 14px 96px;
+    }
+
+    .screen.active {
+      display: block;
+      animation: screen-in 280ms cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    @keyframes screen-in {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel {
+      border: var(--line);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .panel + .panel,
+    .block + .block {
+      margin-top: 14px;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: var(--line);
+      border-radius: 999px;
+      padding: 4px 10px;
+      color: var(--mint-ink);
+      background: var(--mint-soft);
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .kicker::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: var(--mint-deep);
+      box-shadow: 0 0 0 2px rgba(11, 138, 95, 0.18);
+    }
+
+    .hero {
+      background: linear-gradient(160deg, var(--mint-faint) 0%, var(--card) 62%);
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .hero-art {
+      flex: 0 0 auto;
+      width: 64px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      border: var(--line);
+      border-radius: 14px;
+      background: var(--card);
+      box-shadow: var(--shadow-sm);
+      transform: rotate(3deg);
+    }
+
+    .headline {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.22;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    .subcopy {
+      margin: 9px 0 0;
+      color: var(--text);
+      font-size: 13.5px;
+      line-height: 1.65;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .meta-cell {
+      min-height: 66px;
+      border: var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      background: var(--card);
+    }
+
+    .meta-cell b {
+      display: block;
+      font-family: var(--font-pixel);
+      font-size: 17px;
+      line-height: 1.2;
+      font-weight: 400;
+      color: var(--mint-ink);
+    }
+
+    .meta-cell span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.3;
+      font-weight: 800;
+    }
+
+    .section-title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    /* ---------- 徽章 ---------- */
+
+    .badge {
+      flex: 0 0 auto;
+      border: var(--line);
+      border-radius: 10px;
+      padding: 6px 9px;
+      color: var(--mint-ink);
+      background: var(--mint-soft);
+      box-shadow: 2px 2px 0 var(--ink);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .badge.warn {
+      color: var(--amber-deep);
+      background: var(--amber-soft);
+    }
+
+    .badge.stop {
+      color: var(--coral-deep);
+      background: var(--coral-soft);
+    }
+
+    .badge.info {
+      color: var(--blue-deep);
+      background: var(--blue-soft);
+    }
+
+    /* ---------- 疼痛滑杆 ---------- */
+
+    .range-row {
+      border: var(--line);
+      border-radius: 14px;
+      padding: 13px 13px 11px;
+      background: var(--paper);
+    }
+
+    .range-head,
+    .inline-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .range-head strong {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .range-head b {
+      color: var(--mint-ink);
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 14px;
+      margin: 14px 0 7px;
+      border: var(--line);
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--mint) var(--fill, 20%), var(--track) var(--fill, 20%));
+      box-shadow: inset 2px 2px 0 rgba(33, 49, 42, 0.12);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border: var(--line);
+      border-radius: 50%;
+      background: var(--card);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border: var(--line);
+      border-radius: 50%;
+      background: var(--card);
+      box-shadow: 2px 2px 0 var(--ink);
+    }
+
+    .scale {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 10.5px;
+    }
+
+    /* ---------- 安全确认清单 ---------- */
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .check-box {
+      position: relative;
+      min-height: 92px;
+      border: var(--line);
+      border-radius: 14px;
+      padding: 10px 9px;
+      background: var(--card);
+      cursor: pointer;
+      transition: background 140ms ease, box-shadow 140ms ease;
+    }
+
+    .check-box input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .check-box .tick {
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      border: var(--line);
+      border-radius: 7px;
+      background: var(--paper);
+      transition: background 140ms ease;
+    }
+
+    .check-box .tick::after {
+      content: "";
+      width: 11px;
+      height: 9px;
+      background: none;
+    }
+
+    .check-box:has(input:checked) {
+      background: var(--mint-faint);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .check-box:has(input:checked) .tick {
+      background: var(--mint);
+    }
+
+    .check-box:has(input:checked) .tick::after {
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5.2 4.4 8.6 11 1.4' fill='none' stroke='%2321312a' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+
+    .check-box:has(input:focus-visible) {
+      outline: 3px solid var(--mint);
+      outline-offset: 2px;
+    }
+
+    .check-box strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .check-box span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* ---------- 训练路径 ---------- */
+
+    .exercise-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .exercise-row {
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      gap: 11px;
+      align-items: center;
+      min-height: 60px;
+      border: var(--line);
+      border-radius: 14px;
+      padding: 10px 11px;
+      background: var(--card);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .exercise-row:hover {
+      box-shadow: var(--shadow-sm);
+      transform: translate(-1px, -1px);
+    }
+
+    .exercise-no {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: var(--line);
+      border-radius: 11px;
+      color: var(--ink);
+      background: var(--mint);
+      box-shadow: 2px 2px 0 var(--ink);
+      font-family: var(--font-pixel);
+      font-size: 14px;
+    }
+
+    .exercise-row strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .exercise-row span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11.5px;
+      line-height: 1.4;
+    }
+
+    .small-pill {
+      border: var(--line);
+      border-radius: 8px;
+      padding: 5px 8px;
+      color: var(--mint);
+      background: var(--ink);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    /* ---------- 表单 ---------- */
+
+    .form-row {
+      display: grid;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .form-row label {
+      color: var(--muted);
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    select {
+      min-height: 44px;
+      border: var(--line);
+      border-radius: var(--radius-sm);
+      padding: 0 38px 0 12px;
+      color: var(--ink);
+      font-weight: 700;
+      background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='m1 1.5 5 5 5-5' fill='none' stroke='%2321312a' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E") right 13px center / 12px no-repeat;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    select:focus,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 3px solid var(--mint);
+      outline-offset: 2px;
+    }
+
+    /* ---------- 摄像头取景器 ---------- */
+
+    .camera-box {
+      position: relative;
+      height: 250px;
+      overflow: hidden;
+      border: var(--line);
+      border-radius: var(--radius);
+      background: #101b16;
+      box-shadow: var(--shadow);
+    }
+
+    .camera-box.tall {
+      height: 292px;
+    }
+
+    .camera-box video,
+    .camera-box canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .camera-box canvas {
+      z-index: 2;
+    }
+
+    .vf {
+      position: absolute;
+      z-index: 3;
+      width: 18px;
+      height: 18px;
+      border: 3px solid var(--mint);
+      opacity: 0.95;
+      pointer-events: none;
+    }
+
+    .vf.tl { top: 9px; left: 9px; border-right: 0; border-bottom: 0; border-top-left-radius: 6px; }
+    .vf.tr { top: 9px; right: 9px; border-left: 0; border-bottom: 0; border-top-right-radius: 6px; }
+    .vf.bl { bottom: 9px; left: 9px; border-right: 0; border-top: 0; border-bottom-left-radius: 6px; }
+    .vf.br { bottom: 9px; right: 9px; border-left: 0; border-top: 0; border-bottom-right-radius: 6px; }
+
+    .canvas-status {
+      position: absolute;
+      top: 11px;
+      left: 34px;
+      z-index: 4;
+      border: var(--line);
+      border-radius: 8px;
+      padding: 4px 8px;
+      color: var(--blue-deep);
+      background: var(--blue-soft);
+      box-shadow: 2px 2px 0 var(--ink);
+      font-family: var(--font-pixel);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .canvas-status.simulation {
+      color: var(--amber-deep);
+      background: var(--amber-soft);
+    }
+
+    .canvas-status.error {
+      color: var(--coral-deep);
+      background: var(--coral-soft);
+    }
+
+    .camera-box.simulation video {
+      display: none;
+    }
+
+    .camera-fallback {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      color: #b9cec2;
+      font-size: 12.5px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .camera-box.has-signal .camera-fallback {
+      display: none;
+    }
+
+    .status-line {
+      margin: 11px 2px 0;
+      color: var(--text);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .calibration-note {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      border: 2px dashed rgba(33, 49, 42, 0.35);
+      border-radius: 14px;
+      padding: 12px;
+      background: var(--paper);
+      color: var(--text);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+
+    .calibration-note b {
+      color: var(--ink);
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .status-card {
+      min-height: 76px;
+      border: var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px 9px;
+      background: var(--card);
+    }
+
+    .status-card .mono {
+      display: block;
+      color: var(--subtle);
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .status-card strong {
+      display: block;
+      margin-top: 7px;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .status-card span:last-child {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.35;
+    }
+
+    /* ---------- 训练 HUD ---------- */
+
+    .training-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 11px;
+    }
+
+    .training-head h1 {
+      margin: 7px 0 0;
+      font-size: 24px;
+      line-height: 1.18;
+      font-weight: 800;
+    }
+
+    .training-head p {
+      margin: 5px 0 0;
+      color: var(--text);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+
+    .training-context {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 11px;
+    }
+
+    .context-card {
+      border: var(--line);
+      border-radius: var(--radius-sm);
+      padding: 9px 9px;
+      background: var(--card);
+    }
+
+    .context-card span {
+      display: block;
+      color: var(--subtle);
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .context-card strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 12.5px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .progress-block {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .metric {
+      border: var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px 8px 9px;
+      background: var(--card);
+      text-align: center;
+    }
+
+    .metric b {
+      display: block;
+      font-family: var(--font-pixel);
+      font-size: 19px;
+      line-height: 1.15;
+      font-weight: 400;
+      color: var(--mint-ink);
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.25;
+    }
+
+    .progress-bar {
+      height: 15px;
+      overflow: hidden;
+      border: var(--line);
+      border-radius: 999px;
+      background: var(--track);
+      box-shadow: inset 2px 2px 0 rgba(33, 49, 42, 0.12);
+      margin-top: 11px;
+    }
+
+    .progress-bar span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background-color: var(--mint);
+      background-image: repeating-linear-gradient(90deg, rgba(33, 49, 42, 0.22) 0 2px, transparent 2px 9px);
+      transition: width 180ms ease;
+    }
+
+    /* ---------- 按钮 ---------- */
+
+    .action-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      z-index: 30;
+      width: min(100%, 430px);
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 10px;
+      padding: 12px 14px 14px;
+      background: rgba(247, 243, 232, 0.96);
+      border-top: var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn {
+      min-height: 48px;
+      border: var(--line);
+      border-radius: 14px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      box-shadow: var(--shadow-sm);
+      transition: transform 80ms ease, box-shadow 80ms ease, background 140ms ease;
+    }
+
+    .btn:active {
+      transform: translate(3px, 3px);
+      box-shadow: 0 0 0 var(--ink);
+    }
+
+    .btn.primary {
+      color: var(--ink);
+      background: var(--mint);
+    }
+
+    .btn.primary.warn {
+      color: var(--amber-deep);
+      background: var(--amber-soft);
+    }
+
+    .btn.primary.stop {
+      color: #ffffff;
+      background: var(--coral);
+    }
+
+    .btn.secondary {
+      color: #f7f3e8;
+      background: var(--ink);
+    }
+
+    .btn.neutral {
+      color: var(--ink);
+      background: var(--card);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      color: #a39f8f;
+      background: #e7e0cd;
+      border-color: #c9c2ae;
+      box-shadow: none;
+      transform: none;
+      opacity: 1;
+    }
+
+    .wide-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .wide-actions.three {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* ---------- 结果页 ---------- */
+
+    .result-grid {
+      display: grid;
+      gap: 9px;
+    }
+
+    .result-row {
+      border: var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: var(--card);
+    }
+
+    .result-row strong {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .result-row strong span:last-child {
+      font-family: var(--font-mono);
+      color: var(--mint-ink);
+    }
+
+    .result-row p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      line-height: 1.5;
+      word-break: break-all;
+    }
+
+    .life-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .life-cell {
+      min-height: 108px;
+      border: var(--line);
+      border-radius: 14px;
+      padding: 11px 9px;
+      background: var(--card);
+    }
+
+    .life-cell b {
+      display: block;
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .life-cell span {
+      display: inline-flex;
+      margin: 8px 0 6px;
+      border: var(--line);
+      border-radius: 8px;
+      padding: 3px 7px;
+      color: var(--mint-ink);
+      background: var(--mint-soft);
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .life-cell.warn span {
+      color: var(--amber-deep);
+      background: var(--amber-soft);
+    }
+
+    .life-cell p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.5;
+    }
+
+    .field-map {
+      margin-top: 8px;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 500;
+      line-height: 1.45;
+      word-break: break-all;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .history-item {
+      border-bottom: 2px dashed rgba(33, 49, 42, 0.16);
+      padding-bottom: 7px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .history-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    /* ---------- Toast ---------- */
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 88px;
+      z-index: 50;
+      width: min(360px, calc(100vw - 28px));
+      transform: translateX(-50%) translateY(18px);
+      border: var(--line);
+      border-left: 8px solid var(--mint);
+      border-radius: 14px;
+      padding: 11px 14px;
+      color: #f7f3e8;
+      background: var(--ink);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.5;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 430px) {
+      body {
+        background: var(--paper);
+      }
+
+      .app {
+        border-left: 0;
+        border-right: 0;
+      }
+
+      .headline {
+        font-size: 23px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .screen.active {
+        animation: none;
+      }
+
+      .btn,
+      .mini-action,
+      .check-box,
+      .exercise-row {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" aria-label="腕部居家复健动作识别 Demo">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo-tile" aria-hidden="true">
+          <svg width="24" height="28" viewBox="0 0 12 14" shape-rendering="crispEdges">
+            <rect x="1" y="3" width="2" height="6" fill="#f2c89b"/>
+            <rect x="3" y="1" width="2" height="8" fill="#f2c89b"/>
+            <rect x="5" y="2" width="2" height="7" fill="#f2c89b"/>
+            <rect x="7" y="4" width="2" height="5" fill="#f2c89b"/>
+            <rect x="1" y="9" width="8" height="4" fill="#f2c89b"/>
+            <rect x="9" y="8" width="3" height="2" fill="#f2c89b"/>
+            <rect x="1" y="3" width="2" height="1" fill="#0b8a5f"/>
+            <rect x="3" y="1" width="2" height="1" fill="#0b8a5f"/>
+            <rect x="5" y="2" width="2" height="1" fill="#0b8a5f"/>
+            <rect x="7" y="4" width="2" height="1" fill="#0b8a5f"/>
+            <rect x="1" y="13" width="8" height="1" fill="#21312a"/>
+            <rect x="10" y="2" width="1" height="1" fill="#21312a"/>
+            <rect x="11" y="5" width="1" height="1" fill="#21312a"/>
+            <rect x="0" y="1" width="1" height="1" fill="#21312a"/>
+          </svg>
+        </div>
+        <div>
+          <strong>腕力复健小屋</strong>
+          <span id="headerStatus">固定解除后 · LOCAL DATA · 4 STEP FLOW</span>
+        </div>
+      </div>
+      <button class="mini-action" id="exportBtn" type="button">导出</button>
+    </header>
+
+    <nav class="stepper" aria-label="训练流程">
+      <span class="step-pill active" data-step-pill="intro"><i>01</i>确认</span>
+      <span class="step-pill" data-step-pill="calibration"><i>02</i>校准</span>
+      <span class="step-pill" data-step-pill="training"><i>03</i>训练</span>
+      <span class="step-pill" data-step-pill="results"><i>04</i>结果</span>
+    </nav>
+
+    <section class="screen active" id="screen-intro">
+      <div class="panel hero">
+        <div class="hero-top">
+          <span class="kicker">Today's Quest</span>
+          <div class="hero-art" aria-hidden="true">
+            <svg width="40" height="48" viewBox="0 0 12 14" shape-rendering="crispEdges">
+              <rect x="1" y="3" width="2" height="6" fill="#f2c89b"/>
+              <rect x="3" y="1" width="2" height="8" fill="#f2c89b"/>
+              <rect x="5" y="2" width="2" height="7" fill="#f2c89b"/>
+              <rect x="7" y="4" width="2" height="5" fill="#f2c89b"/>
+              <rect x="1" y="9" width="8" height="4" fill="#f2c89b"/>
+              <rect x="9" y="8" width="3" height="2" fill="#f2c89b"/>
+              <rect x="1" y="3" width="2" height="1" fill="#18e299"/>
+              <rect x="3" y="1" width="2" height="1" fill="#18e299"/>
+              <rect x="5" y="2" width="2" height="1" fill="#18e299"/>
+              <rect x="7" y="4" width="2" height="1" fill="#18e299"/>
+              <rect x="1" y="13" width="8" height="1" fill="#21312a"/>
+              <rect x="10" y="1" width="1" height="1" fill="#18e299"/>
+              <rect x="11" y="4" width="1" height="1" fill="#18e299"/>
+              <rect x="0" y="0" width="1" height="1" fill="#18e299"/>
+            </svg>
+          </div>
+        </div>
+        <h1 class="headline">先确认安全，<br>再开始今天的 8 分钟训练</h1>
+        <p class="subcopy">今天会练手指开合、腕屈伸、旋前旋后和端杯稳定。动作数据只保存在这台设备。</p>
+        <div class="meta-grid">
+          <div class="meta-cell"><b>4 项</b><span>核心动作</span></div>
+          <div class="meta-cell"><b>8 分钟</b><span>碎片时间</span></div>
+          <div class="meta-cell"><b>本地</b><span>不上传视频</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>训练前确认</h2>
+            <p>疼痛、僵硬和肿胀先过一遍。</p>
+          </div>
+          <span class="badge" id="readinessBadge">可以训练</span>
+        </div>
+        <div class="range-row">
+          <div class="range-head">
+            <strong>今日疼痛自评</strong>
+            <b><span id="painScore">2</span>/10</b>
+          </div>
+          <input id="painRange" type="range" min="0" max="10" value="2" aria-label="今日疼痛自评">
+          <div class="scale">
+            <span>无明显疼痛</span>
+            <span>明显不适</span>
+          </div>
+        </div>
+        <div class="check-grid">
+          <label class="check-box">
+            <input class="safetyCheck" type="checkbox" checked>
+            <i class="tick" aria-hidden="true"></i>
+            <strong>僵硬轻微</strong>
+            <span>先做小幅动作。</span>
+          </label>
+          <label class="check-box">
+            <input class="safetyCheck" type="checkbox" checked>
+            <i class="tick" aria-hidden="true"></i>
+            <strong>无明显肿胀</strong>
+            <span>没有新增异常变化。</span>
+          </label>
+          <label class="check-box">
+            <input class="safetyCheck" type="checkbox" checked>
+            <i class="tick" aria-hidden="true"></i>
+            <strong>动作可控</strong>
+            <span>以不刺痛为边界。</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>今日训练路径</h2>
+            <p>生活任务映射会合并到结果页。</p>
+          </div>
+        </div>
+        <div class="exercise-list" id="introExerciseList"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-calibration">
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>摄像头与中立位校准</h2>
+            <p>请把前臂和手肘固定在桌面上，用手腕做动作。</p>
+          </div>
+          <span class="badge" id="inputModeBadge">未连接</span>
+        </div>
+        <div class="camera-box" id="calibrationCameraBox">
+          <video id="calibrationVideo" playsinline muted></video>
+          <canvas id="calibrationCanvas"></canvas>
+          <i class="vf tl" aria-hidden="true"></i>
+          <i class="vf tr" aria-hidden="true"></i>
+          <i class="vf bl" aria-hidden="true"></i>
+          <i class="vf br" aria-hidden="true"></i>
+          <div class="canvas-status" id="calibrationCanvasStatus">READY</div>
+          <div class="camera-fallback">连接摄像头或使用模拟关键点回放。评审环境无摄像头时，模拟模式仍会走真实识别逻辑。</div>
+        </div>
+        <p class="status-line" id="calibrationStatus">等待摄像头或模拟模式。</p>
+        <div class="status-grid">
+          <div class="status-card">
+            <span class="mono">Input Source</span>
+            <strong id="inputSourceState">未连接</strong>
+            <span>摄像头或模拟回放</span>
+          </div>
+          <div class="status-card">
+            <span class="mono">Elbow Fixed</span>
+            <strong>手肘贴桌</strong>
+            <span>减少肩肘代偿</span>
+          </div>
+          <div class="status-card">
+            <span class="mono">Calibration</span>
+            <strong id="calibrationState">待采集</strong>
+            <span>中立位 7 天有效</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="injuredSide">受伤侧</label>
+          <select id="injuredSide">
+            <option value="right" selected>右手</option>
+            <option value="left">左手</option>
+          </select>
+        </div>
+        <div class="calibration-note">
+          <span><b>动作约束：</b>手肘固定在桌面上，减少肩肘代偿。</span>
+          <span><b>有效期：</b>校准超过 7 天或机位变化后，训练前会提示重新校准。</span>
+          <span><b>兼容目标：</b>iOS 16+ Safari、Android Chrome、Chrome 109+；摄像头和防熄屏不可用时自动降级。</span>
+        </div>
+        <div class="wide-actions">
+          <button class="btn primary" id="startCameraBtn" type="button">连接摄像头</button>
+          <button class="btn neutral" id="simulationBtn" type="button">模拟训练模式</button>
+        </div>
+        <div class="wide-actions">
+          <button class="btn secondary" id="captureCalibrationBtn" type="button">采集中立位</button>
+          <button class="btn primary" id="beginTrainingBtn" type="button" disabled>开始动作训练</button>
+        </div>
+        <button class="mini-action" id="recalibrateBtn" type="button" style="margin-top: 12px;">重新校准</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-training">
+      <div class="training-head">
+        <div>
+          <span class="kicker">Now Training</span>
+          <h1 id="exerciseTitle">手指开合</h1>
+          <p id="exerciseCue">张开、合拢，再回到张开。</p>
+        </div>
+        <span class="badge" id="signalBadge">等待手部</span>
+      </div>
+      <div class="training-context">
+        <div class="context-card">
+          <span>Target</span>
+          <strong id="trainingTarget">6 次</strong>
+        </div>
+        <div class="context-card">
+          <span>Source</span>
+          <strong id="trainingSource">未连接</strong>
+        </div>
+        <div class="context-card">
+          <span>Next</span>
+          <strong id="trainingNext">腕屈伸</strong>
+        </div>
+      </div>
+      <div class="camera-box tall" id="trainingCameraBox">
+        <video id="trainingVideo" playsinline muted></video>
+        <canvas id="trainingCanvas"></canvas>
+        <i class="vf tl" aria-hidden="true"></i>
+        <i class="vf tr" aria-hidden="true"></i>
+        <i class="vf bl" aria-hidden="true"></i>
+        <i class="vf br" aria-hidden="true"></i>
+        <div class="canvas-status" id="trainingCanvasStatus">READY</div>
+        <div class="camera-fallback">训练画面会显示手部骨架、角度扇形和轨迹线。</div>
+      </div>
+      <div class="progress-block">
+        <div class="metric"><b id="repMetric">0/6</b><span>次数/目标</span></div>
+        <div class="metric"><b id="rangeMetric">0</b><span>幅度分</span></div>
+        <div class="metric"><b id="controlMetric">0</b><span>控制分</span></div>
+      </div>
+      <div class="progress-bar" aria-label="训练进度"><span id="exerciseProgress"></span></div>
+      <p class="status-line" id="trainingStatus">保持手在画面中央，动作慢一点。</p>
+      <div class="wide-actions three">
+        <button class="btn neutral" id="audioToggleBtn" type="button">声音开</button>
+        <button class="btn neutral" id="pauseBtn" type="button">暂停</button>
+        <button class="btn primary hidden" id="nextExerciseBtn" type="button">下一项</button>
+      </div>
+      <button class="btn primary stop" id="safetyStopBtn" type="button" style="width: 100%; margin-top: 11px;">疼痛/刺痛，暂停训练</button>
+    </section>
+
+    <section class="screen" id="screen-results">
+      <div class="panel hero">
+        <span class="kicker">Quest Clear</span>
+        <h1 class="headline" style="margin-top: 10px;">今天的训练结果</h1>
+        <p class="subcopy" id="resultSummary">完成后会看到次数、稳定性和对应的居家任务。</p>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>动作数据</h2>
+            <p>只保存派生指标，不保存原始视频。</p>
+          </div>
+        </div>
+        <div class="result-grid" id="resultList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>对应的生活动作</h2>
+            <p>把数据变化翻译成家里能感知的动作。</p>
+          </div>
+        </div>
+        <div class="life-grid" id="lifeGrid"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>本地历史</h2>
+            <p>刷新后仍保存在当前浏览器。</p>
+          </div>
+        </div>
+        <div class="history-list" id="historyList">暂无记录。</div>
+        <div class="wide-actions">
+          <button class="btn primary" id="restartBtn" type="button">再练一次</button>
+          <button class="btn neutral" id="clearDataBtn" type="button">清空本地数据</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="action-bar" id="introActions">
+      <button class="btn secondary" id="lowerModeBtn" type="button">降低幅度</button>
+      <button class="btn primary" id="startFlowBtn" type="button">开始今日训练</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="module">
+    const DB_NAME = "fracture-rehab-demo";
+    const DB_VERSION = 1;
+    const USER_ID = "linyun-default";
+    const CALIBRATION_DAYS = 7;
+    const MP_VERSION = "0.10.18";
+    const HAND_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task";
+
+    const EXERCISES = [
+      {
+        id: "ex-finger-open-close",
+        type: "finger_open_close",
+        title: "手指开合",
+        cue: "张开、合拢，再回到张开。先唤醒手指，动作不追求快。",
+        targetReps: 6,
+        targetMs: null,
+        label: "激活"
+      },
+      {
+        id: "ex-wrist-flex-extend",
+        type: "wrist_flex_extend",
+        title: "腕屈伸",
+        cue: "手肘固定在桌面上，只让手腕小幅上抬和下压。",
+        targetReps: 6,
+        targetMs: null,
+        label: "核心"
+      },
+      {
+        id: "ex-pronation-supination",
+        type: "forearm_pronation_supination",
+        title: "旋前旋后",
+        cue: "手腕保持稳定，慢慢把掌心翻向上，再翻向下。",
+        targetReps: 5,
+        targetMs: null,
+        label: "核心"
+      },
+      {
+        id: "ex-cup-stability",
+        type: "cup_stability",
+        title: "端杯稳定",
+        cue: "想象端着半杯水，保持手部中心稳定。",
+        targetReps: 1,
+        targetMs: 12000,
+        label: "生活"
+      }
+    ];
+
+    const HAND_CONNECTIONS = [
+      [0, 1], [1, 2], [2, 3], [3, 4],
+      [0, 5], [5, 6], [6, 7], [7, 8],
+      [0, 9], [9, 10], [10, 11], [11, 12],
+      [0, 13], [13, 14], [14, 15], [15, 16],
+      [0, 17], [17, 18], [18, 19], [19, 20],
+      [5, 9], [9, 13], [13, 17]
+    ];
+
+    const dom = {
+      screens: {
+        intro: document.getElementById("screen-intro"),
+        calibration: document.getElementById("screen-calibration"),
+        training: document.getElementById("screen-training"),
+        results: document.getElementById("screen-results")
+      },
+      stepPills: document.querySelectorAll("[data-step-pill]"),
+      headerStatus: document.getElementById("headerStatus"),
+      introActions: document.getElementById("introActions"),
+      introExerciseList: document.getElementById("introExerciseList"),
+      painRange: document.getElementById("painRange"),
+      painScore: document.getElementById("painScore"),
+      readinessBadge: document.getElementById("readinessBadge"),
+      safetyChecks: document.querySelectorAll(".safetyCheck"),
+      lowerModeBtn: document.getElementById("lowerModeBtn"),
+      startFlowBtn: document.getElementById("startFlowBtn"),
+      inputModeBadge: document.getElementById("inputModeBadge"),
+      calibrationCameraBox: document.getElementById("calibrationCameraBox"),
+      calibrationVideo: document.getElementById("calibrationVideo"),
+      calibrationCanvas: document.getElementById("calibrationCanvas"),
+      calibrationCanvasStatus: document.getElementById("calibrationCanvasStatus"),
+      calibrationStatus: document.getElementById("calibrationStatus"),
+      inputSourceState: document.getElementById("inputSourceState"),
+      calibrationState: document.getElementById("calibrationState"),
+      injuredSide: document.getElementById("injuredSide"),
+      startCameraBtn: document.getElementById("startCameraBtn"),
+      simulationBtn: document.getElementById("simulationBtn"),
+      captureCalibrationBtn: document.getElementById("captureCalibrationBtn"),
+      beginTrainingBtn: document.getElementById("beginTrainingBtn"),
+      recalibrateBtn: document.getElementById("recalibrateBtn"),
+      trainingCameraBox: document.getElementById("trainingCameraBox"),
+      trainingVideo: document.getElementById("trainingVideo"),
+      trainingCanvas: document.getElementById("trainingCanvas"),
+      trainingCanvasStatus: document.getElementById("trainingCanvasStatus"),
+      exerciseTitle: document.getElementById("exerciseTitle"),
+      exerciseCue: document.getElementById("exerciseCue"),
+      trainingTarget: document.getElementById("trainingTarget"),
+      trainingSource: document.getElementById("trainingSource"),
+      trainingNext: document.getElementById("trainingNext"),
+      signalBadge: document.getElementById("signalBadge"),
+      repMetric: document.getElementById("repMetric"),
+      rangeMetric: document.getElementById("rangeMetric"),
+      controlMetric: document.getElementById("controlMetric"),
+      exerciseProgress: document.getElementById("exerciseProgress"),
+      trainingStatus: document.getElementById("trainingStatus"),
+      audioToggleBtn: document.getElementById("audioToggleBtn"),
+      pauseBtn: document.getElementById("pauseBtn"),
+      nextExerciseBtn: document.getElementById("nextExerciseBtn"),
+      safetyStopBtn: document.getElementById("safetyStopBtn"),
+      resultSummary: document.getElementById("resultSummary"),
+      resultList: document.getElementById("resultList"),
+      lifeGrid: document.getElementById("lifeGrid"),
+      historyList: document.getElementById("historyList"),
+      restartBtn: document.getElementById("restartBtn"),
+      clearDataBtn: document.getElementById("clearDataBtn"),
+      exportBtn: document.getElementById("exportBtn"),
+      toast: document.getElementById("toast")
+    };
+
+    const state = {
+      db: null,
+      user: null,
+      pain: 2,
+      lowIntensity: false,
+      inputMode: "none",
+      handLandmarker: null,
+      mpLoaded: false,
+      stream: null,
+      latestSample: null,
+      latestCameraLandmarks: null,
+      calibration: null,
+      session: null,
+      exerciseIndex: 0,
+      tracker: null,
+      results: [],
+      safetyEvents: [],
+      trainingLoopId: null,
+      paused: false,
+      exerciseDone: false,
+      audioEnabled: true,
+      wakeLock: null,
+      simulationData: null,
+      simulationStart: 0,
+      inferenceIntervalMs: 90,
+      lastInferenceAt: 0,
+      smoothedLandmarks: null,
+      renderSkip: 0
+    };
+
+    init();
+
+    async function init() {
+      state.simulationData = buildSimulationData();
+      renderIntroExercises();
+      bindEvents();
+      updateReadiness();
+      state.db = await openDatabase();
+      state.user = await ensureDefaultUser();
+      state.calibration = await getActiveCalibration();
+      if (state.calibration) {
+        dom.beginTrainingBtn.disabled = false;
+        dom.calibrationState.textContent = "有效";
+        dom.calibrationStatus.textContent = "检测到有效校准。机位变化时请重新校准。";
+      }
+      await renderHistory();
+    }
+
+    function bindEvents() {
+      dom.painRange.addEventListener("input", updateReadiness);
+      dom.safetyChecks.forEach((item) => item.addEventListener("change", updateReadiness));
+      dom.lowerModeBtn.addEventListener("click", () => {
+        state.lowIntensity = true;
+        showToast("已切换为降低幅度：目标次数会减少，动作范围更小。");
+        updateReadiness();
+      });
+      dom.startFlowBtn.addEventListener("click", startFlow);
+      dom.startCameraBtn.addEventListener("click", startCameraMode);
+      dom.simulationBtn.addEventListener("click", () => useSimulationMode("已切换为模拟关键点回放。"));
+      dom.captureCalibrationBtn.addEventListener("click", captureCalibration);
+      dom.beginTrainingBtn.addEventListener("click", beginTraining);
+      dom.recalibrateBtn.addEventListener("click", async () => {
+        await deactivateCalibrations();
+        state.calibration = null;
+        dom.beginTrainingBtn.disabled = true;
+        dom.calibrationState.textContent = "待采集";
+        showToast("已清除当前校准，请重新采集中立位。");
+      });
+      dom.audioToggleBtn.addEventListener("click", () => {
+        state.audioEnabled = !state.audioEnabled;
+        dom.audioToggleBtn.textContent = state.audioEnabled ? "声音开" : "声音关";
+        showToast(state.audioEnabled ? "声音反馈已开启。" : "声音反馈已关闭。");
+      });
+      dom.pauseBtn.addEventListener("click", togglePause);
+      dom.nextExerciseBtn.addEventListener("click", goNextExercise);
+      dom.safetyStopBtn.addEventListener("click", () => finishSession("interrupted", "已记录安全暂停。今天先停止训练。"));
+      dom.restartBtn.addEventListener("click", restartDemo);
+      dom.clearDataBtn.addEventListener("click", clearLocalData);
+      dom.exportBtn.addEventListener("click", exportLocalData);
+      window.addEventListener("resize", () => {
+        resizeCanvas(dom.calibrationCanvas);
+        resizeCanvas(dom.trainingCanvas);
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && !state.paused && dom.screens.training.classList.contains("active")) {
+          requestWakeLock();
+        }
+      });
+    }
+
+    function renderIntroExercises() {
+      dom.introExerciseList.innerHTML = EXERCISES.map((exercise, index) => `
+        <div class="exercise-row">
+          <div class="exercise-no">${index + 1}</div>
+          <div>
+            <strong>${exercise.title}</strong>
+            <span>${exercise.cue}</span>
+          </div>
+          <span class="small-pill">${exercise.label}</span>
+        </div>
+      `).join("");
+    }
+
+    function updateReadiness() {
+      const value = Number(dom.painRange.value);
+      const allChecked = Array.from(dom.safetyChecks).every((item) => item.checked);
+      state.pain = value;
+      dom.painScore.textContent = value;
+      dom.painRange.style.setProperty("--fill", (value * 10) + "%");
+      dom.readinessBadge.classList.remove("warn", "stop");
+      dom.startFlowBtn.classList.remove("warn", "stop");
+      if (value >= 8 || !allChecked) {
+        dom.readinessBadge.textContent = value >= 8 ? "建议暂停" : "需先确认";
+        dom.readinessBadge.classList.add("stop");
+        dom.startFlowBtn.textContent = "今日暂停";
+        dom.startFlowBtn.classList.add("stop");
+      } else if (value >= 5 || state.lowIntensity) {
+        dom.readinessBadge.textContent = "降低幅度";
+        dom.readinessBadge.classList.add("warn");
+        dom.startFlowBtn.textContent = "低幅度开始";
+        dom.startFlowBtn.classList.add("warn");
+      } else {
+        dom.readinessBadge.textContent = "可以训练";
+        dom.startFlowBtn.textContent = "开始校准";
+      }
+    }
+
+    function startFlow() {
+      const allChecked = Array.from(dom.safetyChecks).every((item) => item.checked);
+      if (state.pain >= 8 || !allChecked) {
+        showToast("今天不进入训练。若疼痛、肿胀或刺痛明显，请暂停并咨询医生。");
+        return;
+      }
+      state.lowIntensity = state.lowIntensity || state.pain >= 5;
+      goTo("calibration");
+      if (isCalibrationExpired(state.calibration)) {
+        dom.beginTrainingBtn.disabled = true;
+        dom.calibrationState.textContent = state.calibration ? "已过期" : "待采集";
+        dom.calibrationStatus.textContent = state.calibration ? "上次校准已超过 7 天，请重新采集中立位。" : "首次训练需要采集中立位。";
+      }
+    }
+
+    async function startCameraMode() {
+      dom.startCameraBtn.disabled = true;
+      dom.calibrationStatus.textContent = "正在加载 Hand Landmarker 和摄像头。";
+      try {
+        await loadHandLandmarker();
+        await startCamera();
+        state.inputMode = "camera";
+        dom.inputModeBadge.textContent = "摄像头";
+        dom.inputModeBadge.className = "badge";
+        dom.inputSourceState.textContent = "摄像头";
+        setCanvasStatus(dom.calibrationCanvasStatus, "CAMERA", "info");
+        setCanvasStatus(dom.trainingCanvasStatus, "CAMERA", "info");
+        dom.calibrationCameraBox.classList.remove("simulation");
+        dom.calibrationCameraBox.classList.add("has-signal");
+        dom.trainingCameraBox.classList.remove("simulation");
+        dom.trainingCameraBox.classList.add("has-signal");
+        dom.calibrationStatus.textContent = "摄像头已就绪。请把手放在画面中央后采集中立位。";
+        showToast("摄像头已连接。");
+        startCalibrationPreview();
+      } catch (error) {
+        console.warn(error);
+        useSimulationMode("摄像头或模型不可用，已切换为模拟关键点回放。");
+      } finally {
+        dom.startCameraBtn.disabled = false;
+      }
+    }
+
+    async function loadHandLandmarker() {
+      if (state.handLandmarker) return;
+      const mediaPipe = await import(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSION}`);
+      const vision = await mediaPipe.FilesetResolver.forVisionTasks(`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSION}/wasm`);
+      const createOptions = (delegate) => ({
+        baseOptions: {
+          modelAssetPath: HAND_MODEL_URL,
+          delegate
+        },
+        runningMode: "VIDEO",
+        numHands: 1,
+        minHandDetectionConfidence: 0.52,
+        minHandPresenceConfidence: 0.52,
+        minTrackingConfidence: 0.52
+      });
+      try {
+        state.handLandmarker = await mediaPipe.HandLandmarker.createFromOptions(vision, createOptions("GPU"));
+      } catch (gpuError) {
+        console.warn("GPU delegate unavailable, falling back to CPU.", gpuError);
+        state.handLandmarker = await mediaPipe.HandLandmarker.createFromOptions(vision, createOptions("CPU"));
+      }
+      state.mpLoaded = true;
+    }
+
+    async function startCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("当前浏览器或上下文不支持 getUserMedia。");
+      }
+      stopCamera();
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          },
+          audio: false
+        });
+      } catch (primaryError) {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
+      state.stream = stream;
+      dom.calibrationVideo.srcObject = stream;
+      dom.trainingVideo.srcObject = stream;
+      await dom.calibrationVideo.play();
+      await dom.trainingVideo.play().catch(() => {});
+    }
+
+    function stopCamera() {
+      if (state.stream) {
+        state.stream.getTracks().forEach((track) => track.stop());
+      }
+      state.stream = null;
+      dom.calibrationVideo.srcObject = null;
+      dom.trainingVideo.srcObject = null;
+    }
+
+    function useSimulationMode(message) {
+      state.inputMode = "simulation";
+      stopCamera();
+      state.latestCameraLandmarks = cloneLandmarks(createHandLandmarks({ curl: 0, tiltDeg: 0, roll: 0, jitter: 0 }));
+      dom.inputModeBadge.textContent = "模拟";
+      dom.inputModeBadge.className = "badge warn";
+      dom.inputSourceState.textContent = "模拟回放";
+      setCanvasStatus(dom.calibrationCanvasStatus, "SIMULATION", "simulation");
+      setCanvasStatus(dom.trainingCanvasStatus, "SIMULATION", "simulation");
+      dom.calibrationCameraBox.classList.add("simulation", "has-signal");
+      dom.trainingCameraBox.classList.add("simulation", "has-signal");
+      dom.calibrationStatus.textContent = "模拟模式使用内置关键点时序 JSON，按正常速度回放并进入真实识别逻辑。";
+      drawCalibrationFrame(state.latestCameraLandmarks, "simulation");
+      showToast(message);
+    }
+
+    function startCalibrationPreview() {
+      const preview = async () => {
+        if (state.inputMode !== "camera" || !dom.screens.calibration.classList.contains("active")) return;
+        const sample = await readCameraSample(performance.now());
+        if (sample && sample.landmarks) {
+          state.latestCameraLandmarks = sample.landmarks;
+          drawCalibrationFrame(sample.landmarks, "camera");
+        }
+        requestAnimationFrame(preview);
+      };
+      requestAnimationFrame(preview);
+    }
+
+    async function captureCalibration() {
+      const landmarks = state.inputMode === "camera"
+        ? state.latestCameraLandmarks
+        : cloneLandmarks(createHandLandmarks({ curl: 0, tiltDeg: 0, roll: 0, jitter: 0 }));
+      if (!landmarks || landmarks.length !== 21) {
+        showToast("还没有识别到完整手部，请把手放在画面中央。");
+        return;
+      }
+      const now = new Date();
+      const expires = new Date(now.getTime() + CALIBRATION_DAYS * 24 * 60 * 60 * 1000);
+      await deactivateCalibrations();
+      state.calibration = {
+        id: crypto.randomUUID(),
+        userId: USER_ID,
+        injuredSide: dom.injuredSide.value,
+        neutralLandmarks: roundLandmarks(landmarks),
+        thresholds: {
+          fingerOpen: 1.62,
+          fingerClosed: 1.28,
+          wristAngleDeg: 12,
+          roll: 0.075,
+          maxSpeed: state.lowIntensity ? 1.35 : 1.65
+        },
+        createdAt: now.toISOString(),
+        expiresAt: expires.toISOString(),
+        isActive: true
+      };
+      await putRecord("calibrations", state.calibration);
+      await updateUser({ injuredSide: dom.injuredSide.value });
+      dom.beginTrainingBtn.disabled = false;
+      dom.calibrationState.textContent = "有效";
+      dom.calibrationStatus.textContent = "中立位已保存，有效期 7 天。机位变化时请重新校准。";
+      showToast("中立位校准已保存。");
+    }
+
+    async function beginTraining() {
+      if (!state.calibration || isCalibrationExpired(state.calibration)) {
+        showToast("请先完成有效的中立位校准。");
+        return;
+      }
+      if (state.inputMode === "none") {
+        useSimulationMode("未连接摄像头，已进入模拟模式。");
+      }
+      state.session = {
+        id: crypto.randomUUID(),
+        userId: USER_ID,
+        startedAt: new Date().toISOString(),
+        completedAt: null,
+        prePain: state.pain,
+        postPain: null,
+        mode: state.inputMode,
+        status: "active"
+      };
+      state.results = [];
+      state.safetyEvents = [];
+      state.exerciseIndex = 0;
+      state.paused = false;
+      state.exerciseDone = false;
+      goTo("training");
+      await requestWakeLock();
+      startExercise(0);
+    }
+
+    function startExercise(index) {
+      state.exerciseIndex = index;
+      const exercise = getCurrentExercise();
+      state.tracker = createTracker(exercise);
+      state.smoothedLandmarks = null;
+      state.latestSample = null;
+      state.exerciseDone = false;
+      state.simulationStart = performance.now();
+      state.lastInferenceAt = 0;
+      state.inferenceIntervalMs = 90;
+      dom.exerciseTitle.textContent = exercise.title;
+      dom.exerciseCue.textContent = exercise.cue;
+      dom.trainingTarget.textContent = exercise.targetMs ? `${Math.round(exercise.targetMs / 1000)} 秒` : `${targetReps(exercise)} 次`;
+      dom.trainingSource.textContent = state.inputMode === "simulation" ? "模拟回放" : "摄像头";
+      dom.trainingNext.textContent = index >= EXERCISES.length - 1 ? "查看结果" : EXERCISES[index + 1].title;
+      dom.nextExerciseBtn.classList.add("hidden");
+      dom.nextExerciseBtn.textContent = index >= EXERCISES.length - 1 ? "查看结果" : "下一项";
+      dom.pauseBtn.textContent = "暂停";
+      dom.signalBadge.textContent = "等待手部";
+      dom.signalBadge.className = "badge warn";
+      dom.trainingStatus.textContent = exercise.type === "wrist_flex_extend"
+        ? "手肘固定在桌面上，只用手腕做小幅屈伸。"
+        : "保持手在画面中央，动作慢一点。";
+      updateTrainingMetrics();
+      cancelAnimationFrame(state.trainingLoopId);
+      state.trainingLoopId = requestAnimationFrame(trainingLoop);
+      speakOrBeep(`${exercise.title}，开始`);
+    }
+
+    async function trainingLoop(now) {
+      if (!dom.screens.training.classList.contains("active")) return;
+      resizeCanvas(dom.trainingCanvas);
+      let sample = state.latestSample;
+      if (!state.paused && !state.exerciseDone && now - state.lastInferenceAt >= state.inferenceIntervalMs) {
+        const start = performance.now();
+        sample = state.inputMode === "camera" ? await readCameraSample(now) : readSimulationSample(now);
+        const elapsed = performance.now() - start;
+        adjustFrameRate(elapsed);
+        state.lastInferenceAt = now;
+        if (sample) {
+          state.latestSample = sample;
+          processTrainingSample(sample);
+        }
+      }
+      state.renderSkip = (state.renderSkip + 1) % (state.inferenceIntervalMs > 145 ? 2 : 1);
+      if (sample && state.renderSkip === 0) {
+        drawTrainingFrame(sample.landmarks || [], state.tracker?.metrics || {});
+      }
+      state.trainingLoopId = requestAnimationFrame(trainingLoop);
+    }
+
+    async function readCameraSample(now) {
+      if (!state.handLandmarker || !dom.trainingVideo.srcObject && !dom.calibrationVideo.srcObject) return null;
+      const video = dom.screens.training.classList.contains("active") ? dom.trainingVideo : dom.calibrationVideo;
+      if (!video.videoWidth || !video.videoHeight) return null;
+      const result = state.handLandmarker.detectForVideo(video, now);
+      if (!result.landmarks || !result.landmarks[0]) {
+        return {
+          timestampMs: now,
+          landmarks: null,
+          handedness: "unknown",
+          confidence: 0,
+          source: "camera"
+        };
+      }
+      const handedness = result.handedness?.[0]?.[0]?.categoryName || "unknown";
+      const confidence = result.handedness?.[0]?.[0]?.score ?? 0.85;
+      return {
+        timestampMs: now,
+        landmarks: normalizeLandmarks(result.landmarks[0]),
+        handedness,
+        confidence,
+        source: "camera"
+      };
+    }
+
+    function readSimulationSample(now) {
+      const exercise = getCurrentExercise();
+      const clip = state.simulationData.clips[exercise.type];
+      const elapsed = Math.min(now - state.simulationStart, clip.durationMs);
+      const frame = getSimulationFrame(clip.frames, elapsed);
+      return {
+        timestampMs: now,
+        landmarks: cloneLandmarks(frame.landmarks),
+        handedness: dom.injuredSide.value === "left" ? "Left" : "Right",
+        confidence: frame.confidence,
+        source: "simulation"
+      };
+    }
+
+    function processTrainingSample(sample) {
+      if (!sample.landmarks || sample.confidence < 0.5) {
+        dom.signalBadge.textContent = "未识别";
+        dom.signalBadge.className = "badge warn";
+        setCanvasStatus(dom.trainingCanvasStatus, "ERROR", "error");
+        dom.trainingStatus.textContent = "没有稳定识别到手，请把手放回画面中央。";
+        return;
+      }
+      const smoothed = smoothLandmarks(sample.landmarks);
+      const cleanSample = { ...sample, landmarks: smoothed };
+      const update = updateTracker(state.tracker, cleanSample, state.calibration);
+      dom.signalBadge.textContent = cleanSample.source === "simulation" ? "模拟回放" : "识别中";
+      dom.signalBadge.className = "badge";
+      setCanvasStatus(dom.trainingCanvasStatus, cleanSample.source === "simulation" ? "SIMULATION" : "CAMERA", cleanSample.source === "simulation" ? "simulation" : "info");
+      dom.trainingStatus.textContent = update.message;
+      updateTrainingMetrics();
+      if (update.completed && !state.exerciseDone) {
+        completeCurrentExercise();
+      }
+    }
+
+    function createTracker(exercise) {
+      return {
+        exercise,
+        startedAt: performance.now(),
+        lastTimestamp: null,
+        reps: 0,
+        halfCycles: 0,
+        phase: "neutral",
+        lastExtreme: null,
+        maxRange: 0,
+        rangeSamples: [],
+        centerHistory: [],
+        speedCurve: [],
+        jitterPeaks: [],
+        warnings: [],
+        stableMs: 0,
+        metrics: {
+          rangeScore: 0,
+          stabilityScore: 0,
+          controlScore: 0,
+          progress: 0,
+          angleDeg: 0,
+          roll: 0,
+          openScore: 0,
+          speed: 0
+        }
+      };
+    }
+
+    function updateTracker(tracker, sample, calibration) {
+      const landmarks = sample.landmarks;
+      const thresholds = calibration.thresholds || {};
+      const dt = tracker.lastTimestamp ? Math.max(16, sample.timestampMs - tracker.lastTimestamp) : 100;
+      tracker.lastTimestamp = sample.timestampMs;
+      const center = handCenter(landmarks);
+      updateSpeed(tracker, center, dt, sample.timestampMs);
+      if (tracker.metrics.speed > (thresholds.maxSpeed || 1.65)) {
+        addWarning(tracker, "动作过快");
+        return { completed: false, message: "慢一点，先保证动作可控。" };
+      }
+
+      switch (tracker.exercise.type) {
+        case "finger_open_close":
+          return updateFingerTracker(tracker, landmarks, thresholds);
+        case "wrist_flex_extend":
+          return updateWristTracker(tracker, landmarks, calibration.neutralLandmarks, thresholds);
+        case "forearm_pronation_supination":
+          return updateRollTracker(tracker, landmarks, calibration.neutralLandmarks, thresholds);
+        case "cup_stability":
+          return updateCupTracker(tracker, dt);
+        default:
+          return { completed: false, message: "继续保持动作。" };
+      }
+    }
+
+    function updateFingerTracker(tracker, landmarks, thresholds) {
+      const scale = Math.max(0.001, distance2D(landmarks[0], landmarks[9]));
+      const openScore = [8, 12, 16, 20].reduce((sum, tip) => sum + distance2D(landmarks[tip], landmarks[0]) / scale, 0) / 4;
+      tracker.metrics.openScore = openScore;
+      tracker.maxRange = Math.max(tracker.maxRange, openScore);
+      const openThreshold = thresholds.fingerOpen || 1.62;
+      const closedThreshold = thresholds.fingerClosed || 1.28;
+      if (tracker.phase === "neutral") {
+        tracker.phase = openScore > openThreshold ? "open" : "closed";
+      } else if (tracker.phase === "open" && openScore < closedThreshold) {
+        tracker.phase = "closed";
+      } else if (tracker.phase === "closed" && openScore > openThreshold) {
+        tracker.phase = "open";
+        tracker.reps += 1;
+        speakOrBeep("动作到位");
+      }
+      tracker.metrics.rangeScore = clamp(Math.round((tracker.maxRange - closedThreshold) / 0.85 * 100), 0, 100);
+      tracker.metrics.stabilityScore = scoreFromSpeed(tracker);
+      tracker.metrics.controlScore = Math.round((tracker.metrics.rangeScore * 0.55) + (tracker.metrics.stabilityScore * 0.45));
+      tracker.metrics.progress = Math.min(1, tracker.reps / targetReps(tracker.exercise));
+      return {
+        completed: tracker.reps >= targetReps(tracker.exercise),
+        message: tracker.phase === "open" ? "手指已打开，慢慢合拢。" : "手指已合拢，再慢慢张开。"
+      };
+    }
+
+    function updateWristTracker(tracker, landmarks, neutralLandmarks, thresholds) {
+      const neutral = vector2D(neutralLandmarks[0], neutralLandmarks[9]);
+      const current = vector2D(landmarks[0], landmarks[9]);
+      const angle = signedAngleDeg(neutral, current);
+      tracker.metrics.angleDeg = angle;
+      tracker.maxRange = Math.max(tracker.maxRange, Math.abs(angle));
+      const limit = thresholds.wristAngleDeg || 12;
+      updateCycleFromValue(tracker, angle, limit, -limit);
+      tracker.metrics.rangeScore = clamp(Math.round(tracker.maxRange / 28 * 100), 0, 100);
+      tracker.metrics.stabilityScore = scoreFromSpeed(tracker);
+      tracker.metrics.controlScore = Math.round((tracker.metrics.rangeScore * 0.5) + (tracker.metrics.stabilityScore * 0.5));
+      tracker.metrics.progress = Math.min(1, tracker.reps / targetReps(tracker.exercise));
+      return {
+        completed: tracker.reps >= targetReps(tracker.exercise),
+        message: angle >= 0 ? "进入伸展方向，保持手肘贴桌。" : "进入屈曲方向，动作小一点也可以。"
+      };
+    }
+
+    function updateRollTracker(tracker, landmarks, neutralLandmarks, thresholds) {
+      const roll = palmRoll(landmarks) - palmRoll(neutralLandmarks);
+      tracker.metrics.roll = roll;
+      tracker.maxRange = Math.max(tracker.maxRange, Math.abs(roll));
+      const limit = thresholds.roll || 0.075;
+      updateCycleFromValue(tracker, roll, limit, -limit);
+      tracker.metrics.rangeScore = clamp(Math.round(tracker.maxRange / 0.22 * 100), 0, 100);
+      tracker.metrics.stabilityScore = scoreFromSpeed(tracker);
+      tracker.metrics.controlScore = Math.round((tracker.metrics.rangeScore * 0.55) + (tracker.metrics.stabilityScore * 0.45));
+      tracker.metrics.progress = Math.min(1, tracker.reps / targetReps(tracker.exercise));
+      return {
+        completed: tracker.reps >= targetReps(tracker.exercise),
+        message: roll >= 0 ? "掌心翻向一侧，慢慢回到另一侧。" : "翻转方向已切换，保持节奏。"
+      };
+    }
+
+    function updateCupTracker(tracker, dt) {
+      tracker.stableMs += dt;
+      const targetMs = tracker.exercise.targetMs;
+      const avgSpeed = average(tracker.speedCurve.slice(-24).map((item) => item.value));
+      tracker.metrics.rangeScore = clamp(Math.round(100 - avgSpeed * 85), 0, 100);
+      tracker.metrics.stabilityScore = clamp(Math.round(100 - avgSpeed * 110 - tracker.jitterPeaks.length * 3), 0, 100);
+      tracker.metrics.controlScore = Math.round((tracker.metrics.rangeScore * 0.35) + (tracker.metrics.stabilityScore * 0.65));
+      tracker.metrics.progress = Math.min(1, tracker.stableMs / targetMs);
+      tracker.reps = tracker.metrics.progress >= 1 ? 1 : 0;
+      return {
+        completed: tracker.stableMs >= targetMs,
+        message: tracker.metrics.stabilityScore >= 75 ? "端杯很稳，继续保持。" : "手部有晃动，试着慢慢稳住。"
+      };
+    }
+
+    function updateCycleFromValue(tracker, value, positiveLimit, negativeLimit) {
+      let extreme = null;
+      if (value > positiveLimit) extreme = "positive";
+      if (value < negativeLimit) extreme = "negative";
+      if (!extreme) return;
+      if (tracker.lastExtreme && tracker.lastExtreme !== extreme) {
+        tracker.halfCycles += 1;
+        tracker.reps = Math.floor(tracker.halfCycles / 2);
+        speakOrBeep("动作到位");
+      }
+      tracker.lastExtreme = extreme;
+    }
+
+    function updateSpeed(tracker, center, dt, timestampMs) {
+      const last = tracker.centerHistory[tracker.centerHistory.length - 1];
+      let speed = 0;
+      if (last) {
+        speed = distance2D(center, last) / (dt / 1000);
+      }
+      tracker.metrics.speed = speed;
+      tracker.centerHistory.push(center);
+      if (tracker.centerHistory.length > 80) tracker.centerHistory.shift();
+      const t = Math.round(performance.now() - tracker.startedAt);
+      tracker.speedCurve.push({ t, value: roundNumber(speed, 4) });
+      if (tracker.speedCurve.length > 120) tracker.speedCurve.shift();
+      if (speed > 1.2) {
+        tracker.jitterPeaks.push({ t, value: roundNumber(speed, 4), kind: "speed_peak" });
+        if (tracker.jitterPeaks.length > 30) tracker.jitterPeaks.shift();
+      }
+    }
+
+    function addWarning(tracker, warning) {
+      if (!tracker.warnings.includes(warning)) tracker.warnings.push(warning);
+    }
+
+    function scoreFromSpeed(tracker) {
+      const recent = tracker.speedCurve.slice(-20).map((item) => item.value);
+      const avg = average(recent);
+      return clamp(Math.round(100 - avg * 72 - tracker.jitterPeaks.length * 2), 0, 100);
+    }
+
+    function completeCurrentExercise() {
+      state.exerciseDone = true;
+      const exercise = getCurrentExercise();
+      const tracker = state.tracker;
+      const durationMs = Math.round(performance.now() - tracker.startedAt);
+      state.results.push({
+        id: crypto.randomUUID(),
+        sessionId: state.session.id,
+        exerciseId: exercise.id,
+        exerciseType: exercise.type,
+        completedReps: tracker.reps,
+        targetReps: targetReps(exercise),
+        durationMs,
+        rangeScore: tracker.metrics.rangeScore,
+        stabilityScore: tracker.metrics.stabilityScore,
+        controlScore: tracker.metrics.controlScore,
+        speedCurve: tracker.speedCurve.slice(-80),
+        jitterPeaks: tracker.jitterPeaks.slice(-20),
+        warnings: tracker.warnings,
+        createdAt: new Date().toISOString()
+      });
+      dom.nextExerciseBtn.classList.remove("hidden");
+      dom.trainingStatus.textContent = `${exercise.title}已完成。`;
+      speakOrBeep("本项完成");
+      updateTrainingMetrics();
+    }
+
+    function goNextExercise() {
+      if (state.exerciseIndex >= EXERCISES.length - 1) {
+        finishSession("completed", "训练完成，已保存到本地。");
+        return;
+      }
+      startExercise(state.exerciseIndex + 1);
+    }
+
+    async function finishSession(status, toastMessage) {
+      cancelAnimationFrame(state.trainingLoopId);
+      state.trainingLoopId = null;
+      await releaseWakeLock();
+      if (state.session) {
+        state.session.completedAt = new Date().toISOString();
+        state.session.postPain = state.pain;
+        state.session.mode = state.inputMode;
+        state.session.status = status;
+        await putRecord("sessions", state.session);
+        for (const result of state.results) {
+          await putRecord("exerciseResults", result);
+        }
+        for (const event of state.safetyEvents) {
+          await putRecord("safetyEvents", event);
+        }
+      }
+      if (status === "interrupted" && state.session) {
+        const event = {
+          id: crypto.randomUUID(),
+          sessionId: state.session.id,
+          type: "user_safety_stop",
+          message: "用户在训练中标记疼痛、刺痛或肿胀加重。",
+          createdAt: new Date().toISOString()
+        };
+        await putRecord("safetyEvents", event);
+      }
+      renderResults(status);
+      await renderHistory();
+      goTo("results");
+      showToast(toastMessage);
+    }
+
+    function updateTrainingMetrics() {
+      const exercise = getCurrentExercise();
+      const tracker = state.tracker;
+      const reps = tracker?.reps || 0;
+      const target = targetReps(exercise);
+      dom.repMetric.textContent = `${reps}/${target}`;
+      dom.rangeMetric.textContent = `${tracker?.metrics.rangeScore || 0}`;
+      dom.controlMetric.textContent = `${tracker?.metrics.controlScore || 0}`;
+      dom.exerciseProgress.style.width = `${Math.round((tracker?.metrics.progress || 0) * 100)}%`;
+    }
+
+    async function togglePause() {
+      state.paused = !state.paused;
+      dom.pauseBtn.textContent = state.paused ? "继续" : "暂停";
+      if (state.paused) {
+        await releaseWakeLock();
+        dom.trainingStatus.textContent = "已暂停。恢复后继续当前动作。";
+        speakOrBeep("暂停一下");
+      } else {
+        await requestWakeLock();
+        state.simulationStart = performance.now();
+        dom.trainingStatus.textContent = "继续训练，动作慢一点。";
+      }
+    }
+
+    async function requestWakeLock() {
+      if (!("wakeLock" in navigator)) {
+        dom.trainingStatus.textContent = "当前浏览器不支持防熄屏，请保持屏幕常亮。";
+        return;
+      }
+      try {
+        state.wakeLock = await navigator.wakeLock.request("screen");
+        state.wakeLock.addEventListener("release", () => {
+          state.wakeLock = null;
+        });
+      } catch (error) {
+        dom.trainingStatus.textContent = "防熄屏不可用，请保持屏幕常亮。";
+      }
+    }
+
+    async function releaseWakeLock() {
+      if (state.wakeLock) {
+        try {
+          await state.wakeLock.release();
+        } catch (error) {
+          console.warn(error);
+        }
+        state.wakeLock = null;
+      }
+    }
+
+    function adjustFrameRate(costMs) {
+      if (costMs > state.inferenceIntervalMs * 0.72) {
+        state.inferenceIntervalMs = Math.min(180, state.inferenceIntervalMs + 16);
+      } else if (costMs < state.inferenceIntervalMs * 0.28) {
+        state.inferenceIntervalMs = Math.max(66, state.inferenceIntervalMs - 6);
+      }
+    }
+
+    function renderResults(status) {
+      const completedCount = state.results.filter((item) => item.completedReps >= item.targetReps).length;
+      dom.resultSummary.textContent = status === "completed"
+        ? `完成 ${completedCount}/${EXERCISES.length} 项训练。本次记录已写入本地 IndexedDB。`
+        : `已安全暂停，保存 ${state.results.length} 项已完成动作。`;
+      dom.resultList.innerHTML = state.results.length
+        ? state.results.map((result) => {
+          const exercise = EXERCISES.find((item) => item.type === result.exerciseType);
+          return `
+            <div class="result-row">
+              <strong><span>${exercise?.title || result.exerciseType}</span><span>${result.completedReps}/${result.targetReps}</span></strong>
+              <p>${result.exerciseType} · 幅度 ${result.rangeScore} · 稳定 ${result.stabilityScore} · 控制 ${result.controlScore} · 速度曲线 ${result.speedCurve.length} 点 · 抖动峰值 ${result.jitterPeaks.length}</p>
+            </div>
+          `;
+        }).join("")
+        : `<div class="result-row"><strong>暂无完成动作</strong><p>本次训练在动作完成前暂停。</p></div>`;
+      renderLifeMapping();
+    }
+
+    function renderLifeMapping() {
+      const byType = Object.fromEntries(state.results.map((item) => [item.exerciseType, item]));
+      const finger = byType.finger_open_close?.controlScore || 0;
+      const wrist = byType.wrist_flex_extend?.controlScore || 0;
+      const roll = byType.forearm_pronation_supination?.controlScore || 0;
+      const cup = byType.cup_stability?.stabilityScore || 0;
+      const mappings = [
+        {
+          title: "刷牙轨迹",
+          ok: finger >= 65 && wrist >= 60,
+          copy: finger >= 65 && wrist >= 60 ? "开合和腕屈伸更连贯，刷牙来回动作更容易控制。" : "还需要先把手指开合和小幅屈伸练稳。",
+          fields: "finger_open_close.controlScore + wrist_flex_extend.controlScore"
+        },
+        {
+          title: "转门把手",
+          ok: roll >= 62,
+          copy: roll >= 62 ? "旋前旋后完成度够用，转动门把手会更有把握。" : "翻转幅度还不稳定，先继续小范围旋转。",
+          fields: "forearm_pronation_supination.rangeScore + controlScore"
+        },
+        {
+          title: "端水杯",
+          ok: cup >= 70,
+          copy: cup >= 70 ? "晃动峰值较少，端杯时水面更不容易抖。" : "端杯稳定仍需练习，先从空杯或半杯开始。",
+          fields: "cup_stability.stabilityScore + jitterPeaks.length"
+        }
+      ];
+      dom.lifeGrid.innerHTML = mappings.map((item) => `
+        <div class="life-cell ${item.ok ? "" : "warn"}">
+          <b>${item.title}</b>
+          <span>${item.ok ? "可尝试" : "先降低难度"}</span>
+          <p>${item.copy}</p>
+          <div class="field-map">${item.fields}</div>
+        </div>
+      `).join("");
+    }
+
+    async function renderHistory() {
+      if (!state.db) return;
+      const sessions = (await getAllRecords("sessions"))
+        .sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt))
+        .slice(0, 5);
+      if (!sessions.length) {
+        dom.historyList.textContent = "暂无记录。";
+        return;
+      }
+      dom.historyList.innerHTML = sessions.map((session) => {
+        const date = new Date(session.startedAt).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" });
+        return `<div class="history-item">${date} · ${session.status === "completed" ? "完成" : "暂停"} · ${session.mode === "simulation" ? "模拟" : "摄像头"} · 疼痛 ${session.prePain}/10</div>`;
+      }).join("");
+    }
+
+    async function restartDemo() {
+      await releaseWakeLock();
+      state.session = null;
+      state.results = [];
+      state.safetyEvents = [];
+      state.paused = false;
+      state.exerciseDone = false;
+      goTo("intro");
+    }
+
+    async function clearLocalData() {
+      await releaseWakeLock();
+      stopCamera();
+      if (state.db) state.db.close();
+      await deleteDatabase();
+      state.db = await openDatabase();
+      state.user = await ensureDefaultUser();
+      state.calibration = null;
+      state.results = [];
+      dom.beginTrainingBtn.disabled = true;
+      dom.inputSourceState.textContent = "未连接";
+      dom.calibrationState.textContent = "待采集";
+      setCanvasStatus(dom.calibrationCanvasStatus, "READY", "info");
+      setCanvasStatus(dom.trainingCanvasStatus, "READY", "info");
+      await renderHistory();
+      showToast("本地数据已清空。");
+      goTo("intro");
+    }
+
+    async function exportLocalData() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        users: await getAllRecords("users"),
+        calibrations: await getAllRecords("calibrations"),
+        sessions: await getAllRecords("sessions"),
+        exerciseResults: await getAllRecords("exerciseResults"),
+        safetyEvents: await getAllRecords("safetyEvents")
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `fracture-rehab-demo-${Date.now()}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      showToast("已导出本地 JSON，不包含原始视频。");
+    }
+
+    function goTo(name) {
+      Object.entries(dom.screens).forEach(([key, element]) => element.classList.toggle("active", key === name));
+      const order = ["intro", "calibration", "training", "results"];
+      const activeIndex = order.indexOf(name);
+      dom.stepPills.forEach((pill) => {
+        const index = order.indexOf(pill.dataset.stepPill);
+        pill.classList.toggle("active", pill.dataset.stepPill === name);
+        pill.classList.toggle("done", index >= 0 && index < activeIndex);
+      });
+      dom.headerStatus.textContent = {
+        intro: "LOCAL DATA · CHECKLIST",
+        calibration: "INPUT SOURCE · CALIBRATION",
+        training: "WAKE LOCK · MOTION TRACKING",
+        results: "LOCAL HISTORY · OUTCOMES"
+      }[name] || "LOCAL DATA";
+      dom.introActions.classList.toggle("hidden", name !== "intro");
+      if (name !== "training") {
+        cancelAnimationFrame(state.trainingLoopId);
+        state.trainingLoopId = null;
+        releaseWakeLock();
+      }
+      setTimeout(() => {
+        resizeCanvas(dom.calibrationCanvas);
+        resizeCanvas(dom.trainingCanvas);
+      }, 0);
+    }
+
+    function setCanvasStatus(element, text, type) {
+      element.textContent = text;
+      element.classList.remove("simulation", "error");
+      if (type === "simulation") element.classList.add("simulation");
+      if (type === "error") element.classList.add("error");
+    }
+
+    function showToast(message) {
+      dom.toast.textContent = message;
+      dom.toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => dom.toast.classList.remove("show"), 2400);
+    }
+
+    function speakOrBeep(text) {
+      if (!state.audioEnabled) return;
+      if ("speechSynthesis" in window && "SpeechSynthesisUtterance" in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "zh-CN";
+        utterance.rate = 1.08;
+        utterance.volume = 0.65;
+        window.speechSynthesis.speak(utterance);
+        return;
+      }
+      beep();
+    }
+
+    function beep() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const audio = new AudioContext();
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        oscillator.frequency.value = 620;
+        gain.gain.value = 0.06;
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.start();
+        oscillator.stop(audio.currentTime + 0.08);
+      } catch (error) {
+        console.warn(error);
+      }
+    }
+
+    function drawCalibrationFrame(landmarks, source) {
+      resizeCanvas(dom.calibrationCanvas);
+      const ctx = dom.calibrationCanvas.getContext("2d");
+      clearCanvas(ctx, dom.calibrationCanvas, source === "simulation");
+      if (landmarks) {
+        drawHand(ctx, dom.calibrationCanvas, landmarks);
+        drawElbowInstruction(ctx, dom.calibrationCanvas);
+      }
+    }
+
+    function drawTrainingFrame(landmarks, metrics) {
+      resizeCanvas(dom.trainingCanvas);
+      const ctx = dom.trainingCanvas.getContext("2d");
+      clearCanvas(ctx, dom.trainingCanvas, state.inputMode === "simulation");
+      if (!landmarks.length) return;
+      drawMotionGuide(ctx, dom.trainingCanvas, landmarks, metrics);
+      drawHand(ctx, dom.trainingCanvas, landmarks);
+    }
+
+    function resizeCanvas(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const width = Math.round(rect.width * dpr);
+      const height = Math.round(rect.height * dpr);
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+    }
+
+    function clearCanvas(ctx, canvas, fill) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (fill) {
+        ctx.fillStyle = "#101b16";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    function drawHand(ctx, canvas, landmarks) {
+      const points = landmarks.map((point) => toCanvasPoint(point, canvas));
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 2 * Math.max(1, window.devicePixelRatio || 1);
+      ctx.strokeStyle = "#18e299";
+      HAND_CONNECTIONS.forEach(([a, b]) => {
+        ctx.beginPath();
+        ctx.moveTo(points[a].x, points[a].y);
+        ctx.lineTo(points[b].x, points[b].y);
+        ctx.stroke();
+      });
+      points.forEach((point, index) => {
+        const radius = (index === 0 ? 5 : 3) * Math.max(1, window.devicePixelRatio || 1);
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, radius + 1, 0, Math.PI * 2);
+        ctx.fillStyle = "#18E299";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#fffdf6";
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    function drawMotionGuide(ctx, canvas, landmarks, metrics) {
+      const exercise = getCurrentExercise();
+      const wrist = toCanvasPoint(landmarks[0], canvas);
+      ctx.save();
+      ctx.lineWidth = 2 * Math.max(1, window.devicePixelRatio || 1);
+      if (exercise.type === "wrist_flex_extend") {
+        const radius = Math.min(canvas.width, canvas.height) * 0.22;
+        ctx.fillStyle = "rgba(24, 226, 153, 0.14)";
+        ctx.beginPath();
+        ctx.moveTo(wrist.x, wrist.y);
+        ctx.arc(wrist.x, wrist.y, radius, -Math.PI * 0.78, -Math.PI * 0.22);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "#18E299";
+        ctx.beginPath();
+        ctx.arc(wrist.x, wrist.y, radius, -Math.PI * 0.78, -Math.PI * 0.22);
+        ctx.stroke();
+      } else if (exercise.type === "forearm_pronation_supination") {
+        const y = canvas.height * 0.18;
+        const x1 = canvas.width * 0.22;
+        const x2 = canvas.width * 0.78;
+        const markerX = clamp(((metrics.roll || 0) + 0.22) / 0.44, 0, 1) * (x2 - x1) + x1;
+        ctx.strokeStyle = "#5b8def";
+        ctx.beginPath();
+        ctx.moveTo(x1, y);
+        ctx.lineTo(x2, y);
+        ctx.stroke();
+        ctx.fillStyle = "#5b8def";
+        ctx.beginPath();
+        ctx.arc(markerX, y, 7 * Math.max(1, window.devicePixelRatio || 1), 0, Math.PI * 2);
+        ctx.fill();
+      } else if (exercise.type === "cup_stability") {
+        const center = toCanvasPoint(handCenter(landmarks), canvas);
+        ctx.strokeStyle = "#5b8def";
+        ctx.setLineDash([6 * Math.max(1, window.devicePixelRatio || 1), 6 * Math.max(1, window.devicePixelRatio || 1)]);
+        ctx.strokeRect(center.x - 34, center.y - 34, 68, 68);
+        ctx.setLineDash([]);
+      } else {
+        const open = clamp((metrics.openScore || 1.2) / 2.2, 0, 1);
+        ctx.fillStyle = "rgba(24, 226, 153, 0.14)";
+        ctx.fillRect(canvas.width * 0.12, canvas.height * 0.14, canvas.width * 0.76 * open, 10);
+        ctx.strokeStyle = "#18E299";
+        ctx.strokeRect(canvas.width * 0.12, canvas.height * 0.14, canvas.width * 0.76, 10);
+      }
+      ctx.restore();
+    }
+
+    function drawElbowInstruction(ctx, canvas) {
+      ctx.save();
+      ctx.fillStyle = "#f7f3e8";
+      ctx.font = `${Math.max(12, canvas.width / 32)}px Inter, sans-serif`;
+      ctx.fillText("手肘固定在桌面上", canvas.width * 0.08, canvas.height * 0.88);
+      ctx.strokeStyle = "#5b8def";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width * 0.08, canvas.height * 0.9);
+      ctx.lineTo(canvas.width * 0.58, canvas.height * 0.9);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function toCanvasPoint(point, canvas) {
+      return {
+        x: clamp(point.x, 0.02, 0.98) * canvas.width,
+        y: clamp(point.y, 0.02, 0.98) * canvas.height
+      };
+    }
+
+    function buildSimulationData() {
+      const clipSpecs = {
+        finger_open_close: { durationMs: 7200, stepMs: 120, make: (t) => ({ curl: (Math.sin(t / 7200 * Math.PI * 12 - Math.PI / 2) + 1) / 2, tiltDeg: 0, roll: 0 }) },
+        wrist_flex_extend: { durationMs: 8200, stepMs: 120, make: (t) => ({ curl: 0.08, tiltDeg: Math.sin(t / 8200 * Math.PI * 13) * 24, roll: 0 }) },
+        forearm_pronation_supination: { durationMs: 7800, stepMs: 120, make: (t) => ({ curl: 0.08, tiltDeg: 0, roll: Math.sin(t / 7800 * Math.PI * 11) * 0.18 }) },
+        cup_stability: { durationMs: 12500, stepMs: 120, make: (t) => ({ curl: 0.2, tiltDeg: Math.sin(t / 1200) * 2.2, roll: Math.sin(t / 1600) * 0.025, jitter: Math.sin(t / 470) * 0.003 }) }
+      };
+      const clips = {};
+      Object.entries(clipSpecs).forEach(([type, spec]) => {
+        const frames = [];
+        for (let t = 0; t <= spec.durationMs; t += spec.stepMs) {
+          const pose = spec.make(t);
+          frames.push({
+            timestampMs: t,
+            confidence: 0.94,
+            landmarks: roundLandmarks(createHandLandmarks(pose))
+          });
+        }
+        clips[type] = { durationMs: spec.durationMs, frames };
+      });
+      return {
+        version: 1,
+        format: "mediapipe-hand-landmarks-21",
+        sampleRateMs: 120,
+        clips
+      };
+    }
+
+    function createHandLandmarks({ curl = 0, tiltDeg = 0, roll = 0, jitter = 0 }) {
+      const points = [
+        [0.50, 0.78, 0.00],
+        [0.42, 0.70, -0.01], [0.36, 0.65, -0.015], [0.31, 0.60, -0.02], [0.26, 0.56, -0.025],
+        [0.42, 0.58, -0.02], [0.39, 0.48, -0.025], [0.36, 0.40, -0.03], [0.34, 0.32, -0.035],
+        [0.50, 0.56, -0.025], [0.50, 0.45, -0.03], [0.50, 0.35, -0.035], [0.50, 0.26, -0.04],
+        [0.58, 0.58, -0.02], [0.61, 0.49, -0.025], [0.64, 0.40, -0.03], [0.66, 0.32, -0.035],
+        [0.64, 0.61, -0.015], [0.69, 0.54, -0.02], [0.73, 0.48, -0.025], [0.76, 0.42, -0.03]
+      ].map(([x, y, z]) => ({ x, y, z }));
+      const mcpByTip = { 4: 2, 8: 5, 12: 9, 16: 13, 20: 17 };
+      [3, 4, 6, 7, 8, 10, 11, 12, 14, 15, 16, 18, 19, 20].forEach((index) => {
+        const tip = [4, 8, 12, 16, 20].find((candidate) => index <= candidate && index > mcpByTip[candidate]);
+        const mcp = tip ? points[mcpByTip[tip]] : points[9];
+        const weight = index === tip ? 0.78 : 0.42;
+        points[index].x += (mcp.x - points[index].x) * curl * weight;
+        points[index].y += (0.66 - points[index].y) * curl * weight;
+      });
+      const rad = tiltDeg * Math.PI / 180;
+      const wrist = points[0];
+      points.forEach((point, index) => {
+        if (index === 0) return;
+        const dx = point.x - wrist.x;
+        const dy = point.y - wrist.y;
+        point.x = wrist.x + dx * Math.cos(rad) - dy * Math.sin(rad);
+        point.y = wrist.y + dx * Math.sin(rad) + dy * Math.cos(rad);
+      });
+      points.forEach((point) => {
+        const side = (point.x - 0.50) / 0.26;
+        point.z += side * roll + jitter;
+        point.x += jitter;
+        point.y += jitter * 0.65;
+      });
+      return points;
+    }
+
+    function getSimulationFrame(frames, elapsed) {
+      let selected = frames[0];
+      for (const frame of frames) {
+        if (frame.timestampMs <= elapsed) selected = frame;
+        else break;
+      }
+      return selected;
+    }
+
+    function smoothLandmarks(landmarks) {
+      if (!state.smoothedLandmarks) {
+        state.smoothedLandmarks = cloneLandmarks(landmarks);
+        return state.smoothedLandmarks;
+      }
+      const alpha = 0.42;
+      state.smoothedLandmarks = landmarks.map((point, index) => ({
+        x: state.smoothedLandmarks[index].x * (1 - alpha) + point.x * alpha,
+        y: state.smoothedLandmarks[index].y * (1 - alpha) + point.y * alpha,
+        z: state.smoothedLandmarks[index].z * (1 - alpha) + point.z * alpha
+      }));
+      return state.smoothedLandmarks;
+    }
+
+    function normalizeLandmarks(landmarks) {
+      return landmarks.map((point) => ({
+        x: Number(point.x),
+        y: Number(point.y),
+        z: Number(point.z || 0)
+      }));
+    }
+
+    function cloneLandmarks(landmarks) {
+      return landmarks.map((point) => ({ x: point.x, y: point.y, z: point.z || 0 }));
+    }
+
+    function roundLandmarks(landmarks) {
+      return landmarks.map((point) => ({
+        x: roundNumber(point.x, 5),
+        y: roundNumber(point.y, 5),
+        z: roundNumber(point.z || 0, 5)
+      }));
+    }
+
+    function distance2D(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function vector2D(a, b) {
+      return { x: b.x - a.x, y: b.y - a.y };
+    }
+
+    function signedAngleDeg(a, b) {
+      const cross = a.x * b.y - a.y * b.x;
+      const dot = a.x * b.x + a.y * b.y;
+      return Math.atan2(cross, dot) * 180 / Math.PI;
+    }
+
+    function palmRoll(landmarks) {
+      const width = Math.max(0.001, distance2D(landmarks[5], landmarks[17]));
+      return (landmarks[5].z - landmarks[17].z) / width;
+    }
+
+    function handCenter(landmarks) {
+      const ids = [0, 5, 9, 13, 17];
+      return ids.reduce((acc, id) => {
+        acc.x += landmarks[id].x / ids.length;
+        acc.y += landmarks[id].y / ids.length;
+        acc.z += (landmarks[id].z || 0) / ids.length;
+        return acc;
+      }, { x: 0, y: 0, z: 0 });
+    }
+
+    function targetReps(exercise) {
+      if (exercise.targetMs) return exercise.targetReps;
+      const base = exercise.targetReps;
+      return state.lowIntensity ? Math.max(3, Math.round(base * 0.65)) : base;
+    }
+
+    function getCurrentExercise() {
+      return EXERCISES[state.exerciseIndex];
+    }
+
+    function average(values) {
+      if (!values.length) return 0;
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function roundNumber(value, digits = 2) {
+      const factor = 10 ** digits;
+      return Math.round(value * factor) / factor;
+    }
+
+    function isCalibrationExpired(calibration) {
+      if (!calibration) return true;
+      return new Date(calibration.expiresAt).getTime() <= Date.now();
+    }
+
+    async function openDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          ["users", "calibrations", "sessions", "exerciseResults", "safetyEvents"].forEach((storeName) => {
+            if (!db.objectStoreNames.contains(storeName)) {
+              db.createObjectStore(storeName, { keyPath: "id" });
+            }
+          });
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function txStore(storeName, mode = "readonly") {
+      return state.db.transaction(storeName, mode).objectStore(storeName);
+    }
+
+    function requestPromise(request) {
+      return new Promise((resolve, reject) => {
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    async function putRecord(storeName, value) {
+      return requestPromise(txStore(storeName, "readwrite").put(value));
+    }
+
+    async function getRecord(storeName, id) {
+      return requestPromise(txStore(storeName).get(id));
+    }
+
+    async function getAllRecords(storeName) {
+      if (!state.db) return [];
+      return requestPromise(txStore(storeName).getAll());
+    }
+
+    async function ensureDefaultUser() {
+      const existing = await getRecord("users", USER_ID);
+      if (existing) return existing;
+      const user = {
+        id: USER_ID,
+        displayName: "林芸",
+        age: 42,
+        rehabStage: "骨折固定解除后，居家复健",
+        injuredSide: "right",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      await putRecord("users", user);
+      return user;
+    }
+
+    async function updateUser(patch) {
+      state.user = {
+        ...state.user,
+        ...patch,
+        updatedAt: new Date().toISOString()
+      };
+      await putRecord("users", state.user);
+    }
+
+    async function getActiveCalibration() {
+      const records = await getAllRecords("calibrations");
+      return records
+        .filter((item) => item.userId === USER_ID && item.isActive && !isCalibrationExpired(item))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0] || null;
+    }
+
+    async function deactivateCalibrations() {
+      const records = await getAllRecords("calibrations");
+      for (const record of records) {
+        if (record.userId === USER_ID && record.isActive) {
+          await putRecord("calibrations", { ...record, isActive: false });
+        }
+      }
+    }
+
+    function deleteDatabase() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.deleteDatabase(DB_NAME);
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+        request.onblocked = () => resolve();
+      });
+    }
+  </script>
+</body>
+</html>

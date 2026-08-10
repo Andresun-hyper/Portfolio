@@ -39,6 +39,17 @@ if (!fs.existsSync(distRoot)) {
   throw new Error(`Missing dist directory: ${distRoot}`);
 }
 
+const rootAssets = path.join(projectRoot, 'assets');
+if (fs.existsSync(rootAssets)) {
+  for (const entry of fs.readdirSync(rootAssets)) {
+    if (/^index-[\w-]+\.(?:js|css)$/.test(entry)) {
+      const target = path.join(rootAssets, entry);
+      assertInside(projectRoot, target);
+      fs.rmSync(target, { force: true });
+    }
+  }
+}
+
 for (const entry of fs.readdirSync(distRoot)) {
   const src = path.join(distRoot, entry);
   const dest = path.join(projectRoot, entry);
